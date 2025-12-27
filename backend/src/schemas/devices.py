@@ -20,3 +20,11 @@ class DeviceResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class DeviceTelemetry(BaseModel):
+    serial_number: str
+    fill_level: float
+    weight: float
+    tilted: bool
+    battery_level: int | None = None
