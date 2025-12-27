@@ -16,27 +16,30 @@ router = APIRouter(
 
 
 @router.post("/", response_model=DeviceResponse)
-def register_device(
+def create_device(
     data: DeviceCreate,
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
-    _, role = current
+    entity, role = current
 
     if role not in ("admin", "organization"):
         raise HTTPException(403, "Access denied")
 
-    if db.query(Devices).filter(
+    exists = db.query(Devices).filter(
         Devices.serial_number == data.serial_number
-    ).first():
+    ).first()
+
+    if exists:
         raise HTTPException(409, "Device already exists")
 
     device = Devices(
         device_name=data.device_name,
         serial_number=data.serial_number,
         device_type=data.device_type,
-        container_id=data.container_id,
-        status="active"
+        battery_level=data.battery_level,
+        status="inactive",
+        container_id=data.container_id
     )
 
     db.add(device)
