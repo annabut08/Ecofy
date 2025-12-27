@@ -46,7 +46,7 @@ def register_device(
     return device
 
 
-@router.post("/telemetry")
+@router.post("/telemetry/")
 def receive_telemetry(
     data: DeviceTelemetry,
     db: Session = Depends(get_db)

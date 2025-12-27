@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Boolean, Column, Float, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from src.database import Base
@@ -11,6 +11,8 @@ class Containers(Base):
     type = Column(String(50), nullable=False)
     capacity = Column(Integer)
     fill_level = Column(Integer)
+    weight = Column(Float)
+    tilted = Column(Boolean, default=False)
     status = Column(String(50), nullable=False)
     last_update = Column(DateTime, default=datetime.utcnow)
 
