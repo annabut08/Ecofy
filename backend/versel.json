@@ -4,7 +4,7 @@
             "src": "backend/src/main.py",
             "use": "@vercel/python",
             "config": {
-                "requirementsTxt": "backend/requirements.txt"
+                "requirementsTxt": "requirements.txt"
             }
         }
     ],
