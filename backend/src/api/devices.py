@@ -1,7 +1,7 @@
 from datetime import datetime
 from http.client import HTTPException
 from fastapi import APIRouter, Depends
-from requests import Session
+from sqlalchemy.orm import Session
 
 from src.api.auth import get_current_user
 from src.database import get_db
