@@ -1,6 +1,9 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from dotenv import load_dotenv
+
+load_dotenv()
 
 DATABASE_URL = (
     f"postgresql+psycopg2://{os.getenv('DB_USER')}:"
