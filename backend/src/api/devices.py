@@ -3,6 +3,8 @@ from http.client import HTTPException
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from src.models.container_sites import ContainerSite
+from src.models.containers import Containers
 from src.api.auth import get_current_user
 from src.database import get_db
 from src.models.devices import Devices
@@ -47,6 +49,28 @@ def create_device(
     db.refresh(device)
 
     return device
+
+
+@router.get("/", response_model=list[DeviceResponse])
+def get_devices(
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    if role == "admin":
+        return db.query(Devices).all()
+
+    if role == "organization":
+        return (
+            db.query(Devices)
+            .join(Containers)
+            .join(ContainerSite)
+            .filter(ContainerSite.organization_id == entity.organization_id)
+            .all()
+        )
+
+    raise HTTPException(403, "Access denied")
 
 
 @router.post("/telemetry/")
