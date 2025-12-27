@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from src.models.container_sites import ContainerSite
+from src.models.notifications import Notifications
+from src.models.notifications import Notifications
+from src.schemas.containers import NotificationResponse
 from src.api.auth import get_current_user
 from src.database import get_db
 from src.api.core import hash_password
@@ -76,3 +80,36 @@ def update_organization(
     db.refresh(org)
 
     return org
+
+
+@router.get("/notifications", response_model=list[NotificationResponse])
+def get_notifications_for_org(
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    # 🔐 ADMIN — всі сповіщення
+    if role == "admin":
+        return (
+            db.query(Notifications)
+            .order_by(Notifications.created_at.desc())
+            .all()
+        )
+
+    # 🏢 ORGANIZATION — тільки свої
+    if role == "organization":
+        return (
+            db.query(Notifications)
+            .join(ContainerSite,
+                  Notifications.container_site_id ==
+                  ContainerSite.container_site_id)
+            .filter(
+                ContainerSite.organization_id ==
+                entity.organization_id
+            )
+            .order_by(Notifications.created_at.desc())
+            .all()
+        )
+
+    raise HTTPException(403, "Access denied")
