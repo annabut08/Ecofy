@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import TIMESTAMP, Column, Integer, String, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from src.database import Base
@@ -11,7 +11,11 @@ class Devices(Base):
     device_name = Column(String(100), nullable=False)
     serial_number = Column(String(100), nullable=False)
     device_type = Column(String(50))
-    last_signal = Column(DateTime, default=datetime.utcnow)
+    last_signal = Column(
+        TIMESTAMP,
+        server_default=func.now(),
+        onupdate=func.now()
+    )
     battery_level = Column(Integer)
     status = Column(String(50))
 
