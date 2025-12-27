@@ -1,0 +1,6 @@
+fastapi
+sqlalchemy
+pydantic
+psycopg2-binary
+python-jose
+passlib[bcrypt]
