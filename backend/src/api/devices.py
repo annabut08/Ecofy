@@ -3,6 +3,7 @@ from http.client import HTTPException
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from backend.src.models.notifications import Notifications
 from src.models.container_sites import ContainerSite
 from src.models.containers import Containers
 from src.api.auth import get_current_user
@@ -73,7 +74,7 @@ def get_devices(
     raise HTTPException(403, "Access denied")
 
 
-@router.post("/telemetry/")
+@router.post("/telemetry")
 def receive_telemetry(
     data: DeviceTelemetry,
     db: Session = Depends(get_db)
@@ -85,13 +86,35 @@ def receive_telemetry(
     if not device:
         raise HTTPException(404, "Device not registered")
 
+    if not device.container_id:
+        raise HTTPException(409, "Device not bound to container")
+
+    container = db.query(Containers).filter(
+        Containers.container_id == device.container_id
+    ).first()
+
     device.last_signal = datetime.utcnow()
     device.battery_level = data.battery_level
     device.status = "active"
 
-    db.commit()
+    container.fill_level = data.fill_level
+    container.weight = data.weight
+    container.tilted = data.tilted
+    container.last_update = datetime.utcnow()
 
-    return {
-        "status": "ok",
-        "device_id": device.device_id
-    }
+    if data.fill_level >= 90:
+        db.add(Notifications(
+            message="Контейнер майже заповнений",
+            message_type="WARNING",
+            container_site_id=container.container_site_id
+        ))
+
+    if data.tilted:
+        db.add(Notifications(
+            message="Контейнер нахилений",
+            message_type="CRITICAL",
+            container_site_id=container.container_site_id
+        ))
+
+    db.commit()
+    return {"status": "ok"}
