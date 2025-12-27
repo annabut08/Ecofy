@@ -41,7 +41,7 @@ def create_device(
         serial_number=data.serial_number,
         device_type=data.device_type,
         battery_level=data.battery_level,
-        status="inactive",
+        status="active",
         container_id=data.container_id
     )
 

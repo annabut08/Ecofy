@@ -82,7 +82,7 @@ def update_organization(
     return org
 
 
-@router.get("/notifications", response_model=list[NotificationResponse])
+@router.get("/{organization_id}/notifications", response_model=list[NotificationResponse])
 def get_notifications_for_org(
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
