@@ -3,7 +3,7 @@ from http.client import HTTPException
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from backend.src.models.notifications import Notifications
+from src.models.notifications import Notifications
 from src.models.container_sites import ContainerSite
 from src.models.containers import Containers
 from src.api.auth import get_current_user

@@ -6,7 +6,7 @@ class DeviceBase(BaseModel):
     device_name: str
     serial_number: str
     device_type: str | None = None
-    container_id: str | None = None
+    container_id: int
 
 
 class DeviceCreate(DeviceBase):
