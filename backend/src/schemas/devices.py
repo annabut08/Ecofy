@@ -2,21 +2,30 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class DeviceCreate(BaseModel):
+class DeviceBase(BaseModel):
     device_name: str
     serial_number: str
     device_type: str | None = None
+    container_id: str | None = None
+
+
+class DeviceCreate(DeviceBase):
+    battery_level: int | None = 100
+
+
+class DeviceUpdate(BaseModel):
+    device_name: str | None = None
+    device_type: str | None = None
     container_id: int | None = None
+    battery_level: int | None = None
+    status: str | None = None
 
 
-class DeviceResponse(BaseModel):
+class DeviceResponse(DeviceBase):
     device_id: int
-    device_name: str
-    serial_number: str
-    device_type: str | None
+    battery_level: int | None = None
+    status: str | None = None
     last_signal: datetime
-    battery_level: int | None
-    status: str | None
 
     class Config:
         from_attributes = True
