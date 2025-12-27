@@ -1,3 +1,4 @@
+from datetime import datetime
 from http.client import HTTPException
 from fastapi import APIRouter, Depends
 from requests import Session
@@ -5,7 +6,7 @@ from requests import Session
 from src.api.auth import get_current_user
 from src.database import get_db
 from src.models.devices import Devices
-from src.schemas.devices import DeviceResponse, DeviceCreate
+from src.schemas.devices import DeviceResponse, DeviceCreate, DeviceTelemetry
 
 
 router = APIRouter(
@@ -43,3 +44,27 @@ def register_device(
     db.refresh(device)
 
     return device
+
+
+@router.post("/telemetry")
+def receive_telemetry(
+    data: DeviceTelemetry,
+    db: Session = Depends(get_db)
+):
+    device = db.query(Devices).filter(
+        Devices.serial_number == data.serial_number
+    ).first()
+
+    if not device:
+        raise HTTPException(404, "Device not registered")
+
+    device.last_signal = datetime.utcnow()
+    device.battery_level = data.battery_level
+    device.status = "active"
+
+    db.commit()
+
+    return {
+        "status": "ok",
+        "device_id": device.device_id
+    }
