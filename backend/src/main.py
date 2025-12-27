@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api import users, devices, containers, organizations, auth, client_companies, vehicles, container_sites, admin, requests, pickups
+from backend.src.api import disposal_requests
+from src.api import users, devices, containers, organizations, auth, client_companies, vehicles, container_sites, admin, pickups
 
 
 app = FastAPI(
@@ -31,7 +32,7 @@ app.include_router(containers.router)
 app.include_router(container_sites.router)
 app.include_router(vehicles.router)
 app.include_router(admin.router)
-app.include_router(requests.router)
+app.include_router(disposal_requests.router)
 app.include_router(pickups.router)
 
 
