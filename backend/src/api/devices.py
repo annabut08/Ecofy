@@ -94,18 +94,18 @@ def receive_telemetry(
     ).first()
 
     fill_level = max(0, min(data.fill_level, 100))
-    weight = max(0, data.weight)
+    temperature = max(-40, min(data.temperature, 120))
 
     device.last_signal = datetime.utcnow()
     device.battery_level = data.battery_level
     device.status = "active"
 
-    container.fill_level = data.fill_level
-    container.weight = data.weight
+    container.fill_level = fill_level
+    container.temperature = temperature
     container.tilted = data.tilted
     container.last_update = datetime.utcnow()
 
-    if data.fill_level >= 90:
+    if fill_level >= 90:
         db.add(Notifications(
             message="Контейнер майже заповнений",
             message_type="WARNING",
@@ -116,6 +116,19 @@ def receive_telemetry(
         db.add(Notifications(
             message="Контейнер нахилений",
             message_type="CRITICAL",
+            container_site_id=container.container_site_id
+        ))
+    if temperature >= 60:
+        db.add(Notifications(
+            message=f"Критично висока температура в контейнері ({temperature} °C)",
+            message_type="CRITICAL",
+            container_site_id=container.container_site_id
+        ))
+
+    elif temperature >= 45:
+        db.add(Notifications(
+            message=f"Підвищена температура в контейнері ({temperature} °C)",
+            message_type="WARNING",
             container_site_id=container.container_site_id
         ))
 
@@ -163,7 +176,7 @@ def get_device_telemetry(
         "last_signal": device.last_signal,
 
         "fill_level": container.fill_level,
-        "weight": container.weight,
+        "temperature": container.temperature,
         "tilted": container.tilted,
         "last_update": container.last_update
     }
