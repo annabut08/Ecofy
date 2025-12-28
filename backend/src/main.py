@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api import users, devices, containers, organizations, disposal_requests
 from src.api import auth, client_companies, vehicles, container_sites, admin, pickups
+from src.api import analytics
 
 
 app = FastAPI(
@@ -34,6 +35,7 @@ app.include_router(vehicles.router)
 app.include_router(admin.router)
 app.include_router(disposal_requests.router)
 app.include_router(pickups.router)
+app.include_router(analytics.router)
 
 
 @app.get("/")
