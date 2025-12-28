@@ -44,8 +44,8 @@ class DeviceTelemetryView(BaseModel):
     battery_level: int
     last_signal: datetime
 
-    fill_level: int
-    weight: float
+    fill_level: int | None = None
+    weight: float | None = None
     tilted: bool
     last_update: datetime
 
