@@ -1,6 +1,6 @@
 from pydantic import BaseModel
-from datetime import date, datetime
-from typing import Optional
+from datetime import date, datetime, time
+from typing import List, Optional
 
 
 class WasteTransferActDTO(BaseModel):
@@ -9,13 +9,11 @@ class WasteTransferActDTO(BaseModel):
     contract_number: str
     contract_date: date
 
-    # Відправник
     sender_name: str
     sender_edrpou: str
     sender_address: str
     sender_phone: str
 
-    # Отримувач
     receiver_name: str
     receiver_edrpou: str
     receiver_address: str
@@ -24,3 +22,23 @@ class WasteTransferActDTO(BaseModel):
     transfer_datetime: datetime
     waste_description: str
     rejection_reason: Optional[str] = None
+
+
+class RoutePointDTO(BaseModel):
+    container_site_id: int
+    address: str
+    scheduled_time: time
+    completed_time: Optional[time]
+
+
+class RouteSheetDTO(BaseModel):
+    route_date: date
+
+    organization_name: str
+    organization_edrpou: str
+    organization_phone: str
+
+    vehicle_name: str
+    vehicle_number_plate: str
+
+    route_points: List[RoutePointDTO]
