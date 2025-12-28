@@ -154,6 +154,7 @@ def delete_disposal_request(
     raise HTTPException(403, "Access denied")
 
 
+'''
 @router.get("/statistics", response_model=list[DisposalStatisticsResponse])
 def get_disposal_statistics(
     date_from: date | None = None,
@@ -197,3 +198,4 @@ def get_disposal_statistics(
     ).all()
 
     return stats
+'''

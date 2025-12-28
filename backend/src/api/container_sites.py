@@ -53,20 +53,17 @@ def create_container_site(
     if not organization:
         raise HTTPException(404, "Organization not found")
 
-    # 1️⃣ Створюємо майданчик
     site = ContainerSite(**data.dict())
     db.add(site)
     db.commit()
     db.refresh(site)
 
-    # 2️⃣ Знаходимо всіх користувачів цього міста
     users = (
         db.query(Users)
         .filter(Users.city == site.city)
         .all()
     )
 
-    # 3️⃣ Створюємо сповіщення для КОЖНОГО користувача
     notifications = [
         Notifications(
             user_id=user.user_id,
