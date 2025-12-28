@@ -11,7 +11,7 @@ class Containers(Base):
     type = Column(String(50), nullable=False)
     capacity = Column(Integer)
     fill_level = Column(Integer)
-    weight = Column(Float)
+    temperature = Column(Float)
     tilted = Column(Boolean, default=False)
     status = Column(String(50), nullable=False)
     last_update = Column(DateTime, default=datetime.utcnow)
