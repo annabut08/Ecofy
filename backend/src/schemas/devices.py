@@ -34,7 +34,7 @@ class DeviceResponse(DeviceBase):
 class DeviceTelemetry(BaseModel):
     serial_number: str
     fill_level: float
-    weight: float
+    temperature: float
     tilted: bool
     battery_level: int | None = None
 
@@ -45,7 +45,7 @@ class DeviceTelemetryView(BaseModel):
     last_signal: datetime
 
     fill_level: int | None = None
-    weight: float | None = None
+    temperature: float | None = None
     tilted: bool
     last_update: datetime
 
