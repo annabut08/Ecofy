@@ -37,3 +37,17 @@ class DeviceTelemetry(BaseModel):
     weight: float
     tilted: bool
     battery_level: int | None = None
+
+
+class DeviceTelemetryView(BaseModel):
+    serial_number: str
+    battery_level: int
+    last_signal: datetime
+
+    fill_level: int
+    weight: float
+    tilted: bool
+    last_update: datetime
+
+    class Config:
+        from_attributes = True

@@ -9,7 +9,7 @@ from src.models.containers import Containers
 from src.api.auth import get_current_user
 from src.database import get_db
 from src.models.devices import Devices
-from src.schemas.devices import DeviceResponse, DeviceCreate, DeviceTelemetry
+from src.schemas.devices import DeviceResponse, DeviceCreate, DeviceTelemetry, DeviceTelemetryView
 
 
 router = APIRouter(
@@ -121,3 +121,49 @@ def receive_telemetry(
 
     db.commit()
     return {"status": "ok"}
+
+
+@router.get(
+    "/{device_id}/telemetry",
+    response_model=DeviceTelemetryView
+)
+def get_device_telemetry(
+    device_id: int,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    device = db.query(Devices).filter(
+        Devices.device_id == device_id
+    ).first()
+
+    if not device:
+        raise HTTPException(404, "Device not found")
+
+    container = db.query(Containers).filter(
+        Containers.container_id == device.container_id
+    ).first()
+
+    # перевірка доступу
+    if role == "organization":
+        site = db.query(ContainerSite).filter(
+            ContainerSite.container_site_id == container.container_site_id
+        ).first()
+
+        if site.organization_id != entity.organization_id:
+            raise HTTPException(403, "Access denied")
+
+    if role not in ("admin", "organization"):
+        raise HTTPException(403, "Access denied")
+
+    return {
+        "serial_number": device.serial_number,
+        "battery_level": device.battery_level,
+        "last_signal": device.last_signal,
+
+        "fill_level": container.fill_level,
+        "weight": container.weight,
+        "tilted": container.tilted,
+        "last_update": container.last_update
+    }
