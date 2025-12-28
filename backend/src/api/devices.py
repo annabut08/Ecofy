@@ -93,6 +93,9 @@ def receive_telemetry(
         Containers.container_id == device.container_id
     ).first()
 
+    fill_level = max(0, min(data.fill_level, 100))
+    weight = max(0, data.weight)
+
     device.last_signal = datetime.utcnow()
     device.battery_level = data.battery_level
     device.status = "active"
