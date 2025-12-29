@@ -32,10 +32,10 @@ def client_companies_activity_statistic(
             ClientCompanies.name,
             func.count(DisposalRequests.request_id).label("total_requests"),
             func.count(
-                func.nullif(DisposalRequests.statistic != "completed", True)
+                func.nullif(DisposalRequests.status != "completed", True)
             ).label("completed_requests"),
             func.count(
-                func.nullif(DisposalRequests.statistic == "completed", True)
+                func.nullif(DisposalRequests.status == "completed", True)
             ).label("active_requests"),
             func.max(DisposalRequests.created_at).label("last_activity")
         )
@@ -68,7 +68,7 @@ def organizations_activity_statistic(
             Organization.name,
             func.count(DisposalRequests.request_id).label("total_requests"),
             func.count(
-                func.nullif(DisposalRequests.statistic != "completed", True)
+                func.nullif(DisposalRequests.status != "completed", True)
             ).label("completed_requests"),
             func.count(func.distinct(ContainerSite.container_site_id))
                 .label("container_sites"),

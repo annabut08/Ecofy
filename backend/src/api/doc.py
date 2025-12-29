@@ -6,7 +6,7 @@ from src.models.disposal_requests import DisposalRequests
 from src.models.container_sites import ContainerSite
 from src.models.pickups import Pickups
 from src.models.vehicles import Vehicles
-from src.schemas.doc import RoutePointDTO, RouteSheetDTO, WasteTransferActDTO
+from src.schemas.doc import WasteTransferActDTO
 from src.database import get_db
 from src.models import ClientCompanies, Organization
 from src.api.auth import get_current_user

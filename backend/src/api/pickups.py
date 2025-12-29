@@ -134,8 +134,8 @@ def delete_pickup(
 ):
     entity, role = current
 
-    if role != "admin":
-        raise HTTPException(403, "Only admin can delete pickups")
+    if role not in ("admin", "organization"):
+        raise HTTPException(403, "Access denied")
 
     pickup = db.query(Pickups).filter(
         Pickups.pickup_id == pickup_id
