@@ -17,7 +17,7 @@ router = APIRouter(
     tags=["Devices ⚡"]
 )
 
-'''
+
 @router.post("/", response_model=DeviceResponse)
 def create_device(
     data: DeviceCreate,
@@ -207,4 +207,3 @@ def get_device_telemetry(
         "tilted": container.tilted,
         "last_update": container.last_update
     }
-'''
