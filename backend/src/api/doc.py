@@ -85,7 +85,6 @@ def get_all_waste_transfer_acts(
 
             transfer_datetime=transfer_time,
             waste_description=r.waste_description,
-            rejection_reason=None
         ))
 
     return acts
