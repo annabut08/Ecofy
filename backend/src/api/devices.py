@@ -9,7 +9,8 @@ from src.models.containers import Containers
 from src.api.auth import get_current_user
 from src.database import get_db
 from src.models.devices import Devices
-from src.schemas.devices import DeviceResponse, DeviceCreate, DeviceTelemetry, DeviceTelemetryView
+from src.schemas.devices import DeviceResponse, DeviceCreate, DeviceTelemetry
+from src.schemas.devices import DeviceTelemetryView, DeviceUpdate
 
 
 router = APIRouter(
@@ -72,6 +73,46 @@ def get_devices(
         )
 
     raise HTTPException(403, "Access denied")
+
+
+@router.put("/{device_id}", response_model=DeviceResponse)
+def update_device(
+    device_id: int,
+    data: DeviceUpdate,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    if role not in ("admin", "organization"):
+        raise HTTPException(403, "Access denied")
+
+    device = db.query(Devices).filter(
+        Devices.device_id == device_id
+    ).first()
+
+    if not device:
+        raise HTTPException(404, "Device not found")
+
+    # перевірка доступу для організації
+    if role == "organization":
+        site = (
+            db.query(ContainerSite)
+            .join(Containers)
+            .filter(Containers.container_id == device.container_id)
+            .first()
+        )
+
+        if not site or site.organization_id != entity.organization_id:
+            raise HTTPException(403, "Access denied")
+
+    for field, value in data.dict(exclude_unset=True).items():
+        setattr(device, field, value)
+
+    db.commit()
+    db.refresh(device)
+
+    return device
 
 
 def check_fill_level(fill_level: float, container, db: Session):

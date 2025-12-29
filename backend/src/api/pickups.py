@@ -148,7 +148,6 @@ def delete_pickup(
     db.commit()
 
 
-'''
 @router.get(
     "/statistics",
     response_model=PickupStatisticsResponse
@@ -190,4 +189,3 @@ def pickup_statistics(
         total_pickups=result.total_pickups,
         completed_pickups=result.completed_pickups
     )
-'''
