@@ -30,7 +30,6 @@ def create_pickup(
     if role not in ("admin", "organization"):
         raise HTTPException(403, "Access denied")
 
-    # 1. Перевіряємо майданчик
     containersite = (
         db.query(ContainerSite)
         .filter(ContainerSite.container_site_id == data.container_site_id)
@@ -40,7 +39,6 @@ def create_pickup(
     if not containersite:
         raise HTTPException(404, "Container site not found")
 
-    # 2. Створюємо pickup
     pickup = Pickups(
         scheduled_time=data.scheduled_time,
         container_site_id=data.container_site_id,

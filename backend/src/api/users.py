@@ -98,45 +98,44 @@ def update_user(
 
 
 @router.get(
-    "/{user_id}/container-sites",
+    "/container-sites",
     summary="View container sites by city and waste type"
 )
 def get_container_sites(
-    user_id: int,
     waste_type: str | None = None,
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
     user, role = current
 
+    # Доступ лише для побутових користувачів
+    if role != "user":
+        raise HTTPException(403, "Only users can view container sites")
+
+    query = db.query(ContainerSite).filter(
+        ContainerSite.city == user.city
+    )
+
     if waste_type:
-        sites = (
-            db.query(ContainerSite)
+        query = (
+            query
             .join(
                 Containers,
                 Containers.container_site_id == ContainerSite.container_site_id
             )
-            .filter(
-                ContainerSite.city == user.city,
-                Containers.type == waste_type
-            )
+            .filter(Containers.type == waste_type)
             .distinct()
-            .all()
         )
 
-        if not sites:
-            raise HTTPException(
-                status_code=404,
-                detail=f"No container sites found for waste type '{waste_type}' in your city"
-            )
+    sites = query.all()
 
-        return sites
+    if not sites:
+        raise HTTPException(
+            status_code=404,
+            detail="No container sites found for your request"
+        )
 
-    return (
-        db.query(ContainerSite)
-        .filter(ContainerSite.city == user.city)
-        .all()
-    )
+    return sites
 
 
 @router.get(

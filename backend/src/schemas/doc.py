@@ -6,8 +6,6 @@ from typing import List, Optional
 class WasteTransferActDTO(BaseModel):
     city: str
     act_date: date
-    contract_number: str
-    contract_date: date
 
     sender_name: str
     sender_edrpou: str
@@ -21,7 +19,6 @@ class WasteTransferActDTO(BaseModel):
 
     transfer_datetime: datetime
     waste_description: str
-    rejection_reason: Optional[str] = None
 
 
 class RoutePointDTO(BaseModel):

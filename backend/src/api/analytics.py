@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+
 from src.models import Organization, ContainerSite, Containers
 from src.schemas.analytics import ClientCompanyActivityStats, OrganizationActivityStats
 from src.database import get_db
@@ -17,7 +18,7 @@ router = APIRouter(
     "/client-companies",
     response_model=list[ClientCompanyActivityStats]
 )
-def client_companies_activity_stats(
+def client_companies_activity_statistic(
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
@@ -25,16 +26,16 @@ def client_companies_activity_stats(
     if role != "admin":
         raise HTTPException(403, "Only admin can view analytics")
 
-    stats = (
+    statistic = (
         db.query(
             ClientCompanies.client_id,
             ClientCompanies.name,
             func.count(DisposalRequests.request_id).label("total_requests"),
             func.count(
-                func.nullif(DisposalRequests.status != "completed", True)
+                func.nullif(DisposalRequests.statistic != "completed", True)
             ).label("completed_requests"),
             func.count(
-                func.nullif(DisposalRequests.status == "completed", True)
+                func.nullif(DisposalRequests.statistic == "completed", True)
             ).label("active_requests"),
             func.max(DisposalRequests.created_at).label("last_activity")
         )
@@ -46,14 +47,14 @@ def client_companies_activity_stats(
         .all()
     )
 
-    return stats
+    return statistic
 
 
 @router.get(
     "/organizations",
     response_model=list[OrganizationActivityStats]
 )
-def organizations_activity_stats(
+def organizations_activity_statistic(
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
@@ -61,13 +62,13 @@ def organizations_activity_stats(
     if role != "admin":
         raise HTTPException(403, "Only admin can view analytics")
 
-    stats = (
+    statistic = (
         db.query(
             Organization.organization_id,
             Organization.name,
             func.count(DisposalRequests.request_id).label("total_requests"),
             func.count(
-                func.nullif(DisposalRequests.status != "completed", True)
+                func.nullif(DisposalRequests.statistic != "completed", True)
             ).label("completed_requests"),
             func.count(func.distinct(ContainerSite.container_site_id))
                 .label("container_sites"),
@@ -91,4 +92,4 @@ def organizations_activity_stats(
         .all()
     )
 
-    return stats
+    return statistic

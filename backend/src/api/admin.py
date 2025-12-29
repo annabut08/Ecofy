@@ -269,10 +269,9 @@ def delete_organization(
 
 @router.get(
     "/admin/notifications",
-    summary="View notifications"
+    summary="View all notifications"
 )
 def get_notifications(
-    city: str | None = None,
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
@@ -280,16 +279,8 @@ def get_notifications(
     if role != "admin":
         raise HTTPException(403, "Only admin can view notifications")
 
-    query = (
-        db.query(Notifications)
-        .join(Users, Notifications.user_id == Users.user_id)
-    )
-
-    if city:
-        query = query.filter(Users.city == city)
-
     return (
-        query
+        db.query(Notifications)
         .order_by(Notifications.created_at.desc())
         .all()
     )
