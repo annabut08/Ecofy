@@ -43,63 +43,9 @@ def register_user(data: UserCreate, db: Session = Depends(get_db)):
     return {"message": "User registered successfully", "user_id": new_user.user_id}
 
 
-@router.get("/{user_id}", response_model=UserResponse)
-def get_user(
-    user_id: int,
-    db: Session = Depends(get_db),
-    current=Depends(get_current_user)
-):
-    entity, role = current
-
-    if role != "admin" and (
-        role != "user" or entity.user_id != user_id
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied"
-        )
-
-    user = db.query(Users).filter(Users.user_id == user_id).first()
-    if not user:
-        raise HTTPException(404, "User not found")
-
-    return user
-
-
-@router.put("/{user_id}", response_model=UserResponse)
-def update_user(
-    user_id: int,
-    data: UserCreate,
-    db: Session = Depends(get_db),
-    current=Depends(get_current_user)
-):
-    entity, role = current
-
-    if role != "admin" and (
-        role != "user" or entity.user_id != user_id
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied"
-        )
-
-    user = db.query(Users).filter(Users.user_id == user_id).first()
-    if not user:
-        raise HTTPException(404, "User not found")
-
-    update_data = data.dict(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(user, field, value)
-
-    db.commit()
-    db.refresh(user)
-
-    return user
-
-
 @router.get(
     "/container-sites",
-    summary="View container sites by city and waste type"
+    summary="View container sites by user's city and waste type"
 )
 def get_container_sites(
     waste_type: str | None = None,
@@ -108,12 +54,12 @@ def get_container_sites(
 ):
     user, role = current
 
-    # Доступ лише для побутових користувачів
     if role != "user":
         raise HTTPException(403, "Only users can view container sites")
 
+    # місто береться з профілю користувача
     query = db.query(ContainerSite).filter(
-        ContainerSite.city == user.city
+        ContainerSite.city.ilike(user.city)
     )
 
     if waste_type:
@@ -123,7 +69,7 @@ def get_container_sites(
                 Containers,
                 Containers.container_site_id == ContainerSite.container_site_id
             )
-            .filter(Containers.type == waste_type)
+            .filter(Containers.type.ilike(waste_type))
             .distinct()
         )
 
@@ -183,7 +129,7 @@ def get_container_status(
 
 
 @router.get(
-    "/{user_id}/notifications/container-sites",
+    "/notifications/container-sites",
     summary="Notifications about new container sites in user's city"
 )
 def new_container_site_notifications(
@@ -229,3 +175,57 @@ def waste_collection_notifications(
         .order_by(Notifications.created_at.desc())
         .all()
     )
+
+
+@router.get("/{user_id}", response_model=UserResponse)
+def get_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    if role != "admin" and (
+        role != "user" or entity.user_id != user_id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied"
+        )
+
+    user = db.query(Users).filter(Users.user_id == user_id).first()
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    return user
+
+
+@router.put("/{user_id}", response_model=UserResponse)
+def update_user(
+    user_id: int,
+    data: UserCreate,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    if role != "admin" and (
+        role != "user" or entity.user_id != user_id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied"
+        )
+
+    user = db.query(Users).filter(Users.user_id == user_id).first()
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    update_data = data.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(user, field, value)
+
+    db.commit()
+    db.refresh(user)
+
+    return user
