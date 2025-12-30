@@ -169,6 +169,21 @@ def check_battery(battery_level: int, device, db: Session):
         ))
 
 
+def update_container_status(container: Containers):
+    if container.fill_level >= 90:
+        container.status = "overflowed"
+    elif container.fill_level >= 70:
+        container.status = "almost_full"
+    elif container.tilted:
+        container.status = "tilted"
+    elif container.temperature >= 60:
+        container.status = "fire_risk"
+    elif container.fill_level == 0:
+        container.status = "empty"
+    else:
+        container.status = "normal"
+
+
 @router.post("/telemetry")
 def receive_telemetry(
     data: DeviceTelemetry,
@@ -200,6 +215,8 @@ def receive_telemetry(
     container.temperature = temperature
     container.tilted = data.tilted
     container.last_update = datetime.utcnow()
+
+    update_container_status(container)
 
     check_fill_level(fill_level, container, db)
     check_tilt(data.tilted, container, db)
