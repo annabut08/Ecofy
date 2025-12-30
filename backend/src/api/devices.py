@@ -172,17 +172,17 @@ def check_battery(battery_level: int, device, db: Session):
 def update_container_status(container: Containers):
     statuses = []
     if container.fill_level == 0:
-        statuses.append("empty")
+        statuses.append("порожній")
     if container.fill_level >= 70:
-        statuses.append("almost_full")
+        statuses.append("майже заповнений")
     if container.fill_level >= 90:
-        statuses.append("overflowed")
+        statuses.append("переповнений")
     if container.tilted:
-        statuses.append("tilted")
+        statuses.append("нахилений")
     if container.temperature >= 60:
-        statuses.append("fire_risk")
+        statuses.append("ризик пожежі")
     if not statuses:
-        statuses.append("normal")
+        statuses.append("активний")
     container.status = ",".join(statuses)
 
 
