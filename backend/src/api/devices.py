@@ -271,3 +271,38 @@ def get_device_telemetry(
         "tilted": container.tilted,
         "last_update": container.last_update
     }
+
+
+@router.delete("/{device_id}", status_code=204)
+def delete_device(
+    device_id: int,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    if role not in ("admin", "organization"):
+        raise HTTPException(403, "Access denied")
+
+    device = db.query(Devices).filter(
+        Devices.device_id == device_id
+    ).first()
+
+    if not device:
+        raise HTTPException(404, "Device not found")
+
+    if role == "organization":
+        site = (
+            db.query(ContainerSite)
+            .join(Containers)
+            .filter(Containers.container_id == device.container_id)
+            .first()
+        )
+
+        if not site or site.organization_id != entity.organization_id:
+            raise HTTPException(403, "Access denied")
+
+    db.delete(device)
+    db.commit()
+
+    return
