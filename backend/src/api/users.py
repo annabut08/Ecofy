@@ -45,7 +45,7 @@ def register_user(data: UserCreate, db: Session = Depends(get_db)):
 
 @router.get(
     "/container-sites",
-    summary="View container sites by user's city and waste type"
+    summary="View container sites with container statuses by user's city and waste type"
 )
 def get_container_sites(
     waste_type: str | None = None,
@@ -57,7 +57,6 @@ def get_container_sites(
     if role != "user":
         raise HTTPException(403, "Only users can view container sites")
 
-    # місто береться з профілю користувача
     query = db.query(ContainerSite).filter(
         ContainerSite.city.ilike(user.city)
     )
@@ -65,10 +64,7 @@ def get_container_sites(
     if waste_type:
         query = (
             query
-            .join(
-                Containers,
-                Containers.container_site_id == ContainerSite.container_site_id
-            )
+            .join(Containers)
             .filter(Containers.type.ilike(waste_type))
             .distinct()
         )
@@ -81,51 +77,38 @@ def get_container_sites(
             detail="No container sites found for your request"
         )
 
-    return sites
+    result = []
 
-
-@router.get(
-    "/containers/status",
-    summary="View container fill levels by container sites"
-)
-def get_container_status(
-    db: Session = Depends(get_db),
-    current=Depends(get_current_user)
-):
-    user, role = current
-
-    containers = (
-        db.query(
-            Containers.container_id.label("container_id"),
-            Containers.type.label("container_type"),
-            Containers.fill_level.label("fill_level"),
-            ContainerSite.container_site_id.label("site_id"),
-            ContainerSite.street.label("street"),
-            ContainerSite.building.label("building"),
-            ContainerSite.entrance.label("entrance")
+    for site in sites:
+        containers_query = db.query(Containers).filter(
+            Containers.container_site_id == site.container_site_id
         )
-        .join(
-            ContainerSite,
-            Containers.container_site_id == ContainerSite.container_site_id
-        )
-        .filter(ContainerSite.city == user.city)
-        .all()
-    )
 
-    return [
-        {
-            "container_id": c.container_id,
-            "waste_type": c.container_type,
-            "fill_level": c.fill_level,
-            "container_site": {
-                "site_id": c.site_id,
-                "address": f"{c.street}, {c.building}" + (
-                    f", підʼїзд {c.entrance}" if c.entrance else ""
-                )
-            }
-        }
-        for c in containers
-    ]
+        if waste_type:
+            containers_query = containers_query.filter(
+                Containers.type.ilike(waste_type)
+            )
+
+        containers = containers_query.all()
+
+        result.append({
+            "container_site_id": site.container_site_id,
+            "city": site.city,
+            "street": site.street,
+            "building": site.building,
+            "description": site.description,
+            "containers": [
+                {
+                    "container_id": c.container_id,
+                    "type": c.type,
+                    "status": c.status,
+                    "fill_level": c.fill_level
+                }
+                for c in containers
+            ]
+        })
+
+    return result
 
 
 @router.get(
