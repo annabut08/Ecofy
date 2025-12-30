@@ -83,7 +83,7 @@ def update_organization(
 
 
 @router.get(
-    "/notifications",
+    "/{organization_id}/notifications",
     response_model=list[NotificationResponse]
 )
 def get_notifications_for_org(
