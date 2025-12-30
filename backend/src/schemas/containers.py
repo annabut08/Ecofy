@@ -38,7 +38,8 @@ class NotificationResponse(BaseModel):
     message: str
     message_type: str
     created_at: datetime
-    container_site_id: Optional[int]
+    container_site_id: int | None
+    container_id: int | None
 
     class Config:
         from_attributes = True

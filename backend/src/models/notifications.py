@@ -13,9 +13,12 @@ class Notifications(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"))
+    container_id = Column(Integer, ForeignKey(
+        "containers.container_id"), nullable=True)
     container_site_id = Column(Integer, ForeignKey(
         "containersite.container_site_id", ondelete="SET NULL"))
 
     user = relationship("Users", back_populates="notifications")
     containersite = relationship(
         "ContainerSite", back_populates="notifications")
+    container = relationship("Containers", back_populates="notifications")

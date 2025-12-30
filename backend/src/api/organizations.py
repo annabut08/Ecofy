@@ -89,7 +89,6 @@ def get_notifications_for_org(
 ):
     entity, role = current
 
-    # 🔐 ADMIN — всі сповіщення
     if role == "admin":
         return (
             db.query(Notifications)
@@ -97,7 +96,6 @@ def get_notifications_for_org(
             .all()
         )
 
-    # 🏢 ORGANIZATION — тільки свої
     if role == "organization":
         return (
             db.query(Notifications)

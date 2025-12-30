@@ -120,7 +120,8 @@ def check_fill_level(fill_level: float, container, db: Session):
         db.add(Notifications(
             message="Контейнер майже заповнений",
             message_type="WARNING",
-            container_site_id=container.container_site_id
+            container_site_id=container.container_site_id,
+            container_id=container.container_id
         ))
 
 
@@ -129,7 +130,8 @@ def check_tilt(tilted: bool, container, db: Session):
         db.add(Notifications(
             message="Контейнер нахилений",
             message_type="CRITICAL",
-            container_site_id=container.container_site_id
+            container_site_id=container.container_site_id,
+            container_id=container.container_id
         ))
 
 
@@ -138,13 +140,15 @@ def check_temperature(temperature: float, container, db: Session):
         db.add(Notifications(
             message=f"Критично висока температура в контейнері ({temperature} °C)",
             message_type="CRITICAL",
-            container_site_id=container.container_site_id
+            container_site_id=container.container_site_id,
+            container_id=container.container_id
         ))
     elif temperature >= 45:
         db.add(Notifications(
             message=f"Підвищена температура в контейнері ({temperature} °C)",
             message_type="WARNING",
-            container_site_id=container.container_site_id
+            container_site_id=container.container_site_id,
+            container_id=container.container_id
         ))
 
 
@@ -153,13 +157,15 @@ def check_battery(battery_level: int, device, db: Session):
         db.add(Notifications(
             message="Критично низький рівень заряду батареї пристрою",
             message_type="CRITICAL",
-            container_site_id=device.container.container_site_id
+            container_site_id=device.container.container_site_id,
+            container_id=device.container.container_id
         ))
     elif battery_level <= 20:
         db.add(Notifications(
             message="Низький рівень заряду батареї пристрою",
             message_type="WARNING",
-            container_site_id=device.container.container_site_id
+            container_site_id=device.container.container_site_id,
+            container_id=device.container.container_id
         ))
 
 
