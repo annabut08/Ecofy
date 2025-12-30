@@ -45,7 +45,7 @@ def register_user(data: UserCreate, db: Session = Depends(get_db)):
 
 @router.get(
     "/container-sites",
-    summary="View container sites (users – by city, admin – all)"
+    summary="View container sites"
 )
 def get_container_sites(
     db: Session = Depends(get_db),
@@ -60,7 +60,7 @@ def get_container_sites(
             ContainerSite.city.ilike(entity.city)
         )
     elif role == "admin":
-        pass  # адміністратор бачить всі майданчики
+        pass
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -80,35 +80,40 @@ def get_container_sites(
 
 @router.get(
     "/containers",
-    summary="Search containers by waste type in user's city"
+    summary="Search containers by waste type"
 )
 def search_containers_by_type(
     waste_type: str,
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
-    user, role = current
+    entity, role = current
 
-    if role != "user":
-        raise HTTPException(403, "Only users can search containers")
-
-    containers = (
+    query = (
         db.query(
             Containers.container_id,
             Containers.type,
             Containers.fill_level,
             Containers.status,
             ContainerSite.container_site_id,
+            ContainerSite.city,
             ContainerSite.street,
             ContainerSite.building
         )
         .join(ContainerSite)
-        .filter(
-            ContainerSite.city.ilike(user.city),
-            Containers.type.ilike(waste_type)
-        )
-        .all()
+        .filter(Containers.type.ilike(waste_type))
     )
+
+    if role == "user":
+        query = query.filter(
+            ContainerSite.city.ilike(entity.city)
+        )
+    elif role == "admin":
+        pass
+    else:
+        raise HTTPException(403, "Access denied")
+
+    containers = query.all()
 
     if not containers:
         raise HTTPException(
@@ -124,6 +129,7 @@ def search_containers_by_type(
             "status": c.status,
             "container_site": {
                 "site_id": c.container_site_id,
+                "city": c.city,
                 "address": f"{c.street}, {c.building}"
             }
         }
@@ -133,26 +139,29 @@ def search_containers_by_type(
 
 @router.get(
     "/container-sites/{site_id}/containers",
-    summary="View containers and their status by container site"
+    summary="View containers by container site"
 )
 def get_containers_by_site(
     site_id: int,
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
-    user, role = current
+    entity, role = current
 
-    if role != "user":
-        raise HTTPException(403, "Only users can view container details")
-
-    site = (
-        db.query(ContainerSite)
-        .filter(
-            ContainerSite.container_site_id == site_id,
-            ContainerSite.city.ilike(user.city)
-        )
-        .first()
+    site_query = db.query(ContainerSite).filter(
+        ContainerSite.container_site_id == site_id
     )
+
+    if role == "user":
+        site_query = site_query.filter(
+            ContainerSite.city.ilike(entity.city)
+        )
+    elif role == "admin":
+        pass
+    else:
+        raise HTTPException(403, "Access denied")
+
+    site = site_query.first()
 
     if not site:
         raise HTTPException(404, "Container site not found")
@@ -165,6 +174,7 @@ def get_containers_by_site(
 
     return {
         "container_site_id": site.container_site_id,
+        "city": site.city,
         "address": f"{site.street}, {site.building}",
         "containers": [
             {
