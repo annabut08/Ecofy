@@ -4,6 +4,7 @@ from sqlalchemy import func
 from datetime import date
 from sqlalchemy.orm import Session
 
+from src.models.containers import Containers
 from src.models.users import Users
 from src.models.notifications import Notifications
 from src.database import get_db
@@ -116,6 +117,20 @@ def update_pickup(
 
     if data.completed_time is not None:
         pickup.completed_time = data.completed_time
+
+        containers = (
+            db.query(Containers)
+            .filter(
+                Containers.container_site_id ==
+                pickup.container_site_id
+            )
+            .all()
+        )
+
+        for container in containers:
+            container.fill_level = 0
+            container.status = "empty"
+            container.last_update = data.completed_time
 
     if data.vehicle_id is not None:
         pickup.vehicle_id = data.vehicle_id
