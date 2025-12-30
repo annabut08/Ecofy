@@ -82,7 +82,10 @@ def update_organization(
     return org
 
 
-@router.get("/{organization_id}/notifications", response_model=list[NotificationResponse])
+@router.get(
+    "/notifications",
+    response_model=list[NotificationResponse]
+)
 def get_notifications_for_org(
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
@@ -99,9 +102,11 @@ def get_notifications_for_org(
     if role == "organization":
         return (
             db.query(Notifications)
-            .join(ContainerSite,
-                  Notifications.container_site_id ==
-                  ContainerSite.container_site_id)
+            .join(
+                ContainerSite,
+                Notifications.container_site_id ==
+                ContainerSite.container_site_id
+            )
             .filter(
                 ContainerSite.organization_id ==
                 entity.organization_id
