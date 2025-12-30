@@ -129,7 +129,7 @@ def update_pickup(
 
         for container in containers:
             container.fill_level = 0
-            container.status = "empty"
+            container.status = "порожній"
             container.last_update = data.completed_time
 
     if data.vehicle_id is not None:
