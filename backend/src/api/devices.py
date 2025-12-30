@@ -173,8 +173,6 @@ def update_container_status(container: Containers):
     statuses = []
     if container.fill_level == 0:
         statuses.append("порожній")
-    if container.fill_level >= 70:
-        statuses.append("майже заповнений")
     if container.fill_level >= 90:
         statuses.append("переповнений")
     if container.tilted:
