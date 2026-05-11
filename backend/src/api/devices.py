@@ -74,6 +74,54 @@ def get_devices(
     raise HTTPException(403, "Access denied")
 
 
+def check_fill_level(fill_level: float, container, db: Session):
+    if fill_level >= 90:
+        db.add(Notifications(
+            message="Контейнер майже заповнений",
+            message_type="WARNING",
+            container_site_id=container.container_site_id
+        ))
+
+
+def check_tilt(tilted: bool, container, db: Session):
+    if tilted:
+        db.add(Notifications(
+            message="Контейнер нахилений",
+            message_type="CRITICAL",
+            container_site_id=container.container_site_id
+        ))
+
+
+def check_temperature(temperature: float, container, db: Session):
+    if temperature >= 60:
+        db.add(Notifications(
+            message=f"Критично висока температура в контейнері ({temperature} °C)",
+            message_type="CRITICAL",
+            container_site_id=container.container_site_id
+        ))
+    elif temperature >= 45:
+        db.add(Notifications(
+            message=f"Підвищена температура в контейнері ({temperature} °C)",
+            message_type="WARNING",
+            container_site_id=container.container_site_id
+        ))
+
+
+def check_battery(battery_level: int, device, db: Session):
+    if battery_level <= 10:
+        db.add(Notifications(
+            message="Критично низький рівень заряду батареї пристрою",
+            message_type="CRITICAL",
+            container_site_id=device.container.container_site_id
+        ))
+    elif battery_level <= 20:
+        db.add(Notifications(
+            message="Низький рівень заряду батареї пристрою",
+            message_type="WARNING",
+            container_site_id=device.container.container_site_id
+        ))
+
+
 @router.post("/telemetry")
 def receive_telemetry(
     data: DeviceTelemetry,
@@ -95,9 +143,10 @@ def receive_telemetry(
 
     fill_level = max(0, min(data.fill_level, 100))
     temperature = max(-40, min(data.temperature, 120))
+    battery_level = max(0, min(data.battery_level, 100))
 
     device.last_signal = datetime.utcnow()
-    device.battery_level = data.battery_level
+    device.battery_level = battery_level
     device.status = "active"
 
     container.fill_level = fill_level
@@ -105,32 +154,10 @@ def receive_telemetry(
     container.tilted = data.tilted
     container.last_update = datetime.utcnow()
 
-    if fill_level >= 90:
-        db.add(Notifications(
-            message="Контейнер майже заповнений",
-            message_type="WARNING",
-            container_site_id=container.container_site_id
-        ))
-
-    if data.tilted:
-        db.add(Notifications(
-            message="Контейнер нахилений",
-            message_type="CRITICAL",
-            container_site_id=container.container_site_id
-        ))
-    if temperature >= 60:
-        db.add(Notifications(
-            message=f"Критично висока температура в контейнері ({temperature} °C)",
-            message_type="CRITICAL",
-            container_site_id=container.container_site_id
-        ))
-
-    elif temperature >= 45:
-        db.add(Notifications(
-            message=f"Підвищена температура в контейнері ({temperature} °C)",
-            message_type="WARNING",
-            container_site_id=container.container_site_id
-        ))
+    check_fill_level(fill_level, container, db)
+    check_tilt(data.tilted, container, db)
+    check_temperature(temperature, container, db)
+    check_battery(battery_level, device, db)
 
     db.commit()
     return {"status": "ok"}
