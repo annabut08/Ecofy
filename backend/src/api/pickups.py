@@ -4,6 +4,7 @@ from sqlalchemy import func
 from datetime import date
 from sqlalchemy.orm import Session
 
+from src.models.containers import Containers
 from src.models.users import Users
 from src.models.notifications import Notifications
 from src.database import get_db
@@ -30,7 +31,6 @@ def create_pickup(
     if role not in ("admin", "organization"):
         raise HTTPException(403, "Access denied")
 
-    # 1. Перевіряємо майданчик
     containersite = (
         db.query(ContainerSite)
         .filter(ContainerSite.container_site_id == data.container_site_id)
@@ -40,7 +40,6 @@ def create_pickup(
     if not containersite:
         raise HTTPException(404, "Container site not found")
 
-    # 2. Створюємо pickup
     pickup = Pickups(
         scheduled_time=data.scheduled_time,
         container_site_id=data.container_site_id,
@@ -119,6 +118,20 @@ def update_pickup(
     if data.completed_time is not None:
         pickup.completed_time = data.completed_time
 
+        containers = (
+            db.query(Containers)
+            .filter(
+                Containers.container_site_id ==
+                pickup.container_site_id
+            )
+            .all()
+        )
+
+        for container in containers:
+            container.fill_level = 0
+            container.status = "порожній"
+            container.last_update = data.completed_time
+
     if data.vehicle_id is not None:
         pickup.vehicle_id = data.vehicle_id
 
@@ -136,8 +149,8 @@ def delete_pickup(
 ):
     entity, role = current
 
-    if role != "admin":
-        raise HTTPException(403, "Only admin can delete pickups")
+    if role not in ("admin", "organization"):
+        raise HTTPException(403, "Access denied")
 
     pickup = db.query(Pickups).filter(
         Pickups.pickup_id == pickup_id

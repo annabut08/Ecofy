@@ -21,3 +21,4 @@ class Containers(Base):
 
     containersite = relationship("ContainerSite", back_populates="containers")
     devices = relationship("Devices", back_populates="container")
+    notifications = relationship("Notifications", back_populates="container")

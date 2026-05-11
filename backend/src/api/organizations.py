@@ -82,14 +82,16 @@ def update_organization(
     return org
 
 
-@router.get("/{organization_id}/notifications", response_model=list[NotificationResponse])
+@router.get(
+    "/{organization_id}/notifications",
+    response_model=list[NotificationResponse]
+)
 def get_notifications_for_org(
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
     entity, role = current
 
-    # 🔐 ADMIN — всі сповіщення
     if role == "admin":
         return (
             db.query(Notifications)
@@ -97,13 +99,14 @@ def get_notifications_for_org(
             .all()
         )
 
-    # 🏢 ORGANIZATION — тільки свої
     if role == "organization":
         return (
             db.query(Notifications)
-            .join(ContainerSite,
-                  Notifications.container_site_id ==
-                  ContainerSite.container_site_id)
+            .join(
+                ContainerSite,
+                Notifications.container_site_id ==
+                ContainerSite.container_site_id
+            )
             .filter(
                 ContainerSite.organization_id ==
                 entity.organization_id

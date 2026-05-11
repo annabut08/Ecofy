@@ -9,7 +9,8 @@ from src.models.containers import Containers
 from src.api.auth import get_current_user
 from src.database import get_db
 from src.models.devices import Devices
-from src.schemas.devices import DeviceResponse, DeviceCreate, DeviceTelemetry, DeviceTelemetryView
+from src.schemas.devices import DeviceResponse, DeviceCreate, DeviceTelemetry
+from src.schemas.devices import DeviceTelemetryView, DeviceUpdate
 
 
 router = APIRouter(
@@ -74,12 +75,60 @@ def get_devices(
     raise HTTPException(403, "Access denied")
 
 
+<<<<<<< HEAD
+=======
+@router.put("/{device_id}", response_model=DeviceResponse)
+def update_device(
+    device_id: int,
+    data: DeviceUpdate,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    if role not in ("admin", "organization"):
+        raise HTTPException(403, "Access denied")
+
+    device = db.query(Devices).filter(
+        Devices.device_id == device_id
+    ).first()
+
+    if not device:
+        raise HTTPException(404, "Device not found")
+
+    # перевірка доступу для організації
+    if role == "organization":
+        site = (
+            db.query(ContainerSite)
+            .join(Containers)
+            .filter(Containers.container_id == device.container_id)
+            .first()
+        )
+
+        if not site or site.organization_id != entity.organization_id:
+            raise HTTPException(403, "Access denied")
+
+    for field, value in data.dict(exclude_unset=True).items():
+        setattr(device, field, value)
+
+    db.commit()
+    db.refresh(device)
+
+    return device
+
+
+>>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
 def check_fill_level(fill_level: float, container, db: Session):
     if fill_level >= 90:
         db.add(Notifications(
             message="Контейнер майже заповнений",
             message_type="WARNING",
+<<<<<<< HEAD
             container_site_id=container.container_site_id
+=======
+            container_site_id=container.container_site_id,
+            container_id=container.container_id
+>>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
         ))
 
 
@@ -88,7 +137,12 @@ def check_tilt(tilted: bool, container, db: Session):
         db.add(Notifications(
             message="Контейнер нахилений",
             message_type="CRITICAL",
+<<<<<<< HEAD
             container_site_id=container.container_site_id
+=======
+            container_site_id=container.container_site_id,
+            container_id=container.container_id
+>>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
         ))
 
 
@@ -97,13 +151,23 @@ def check_temperature(temperature: float, container, db: Session):
         db.add(Notifications(
             message=f"Критично висока температура в контейнері ({temperature} °C)",
             message_type="CRITICAL",
+<<<<<<< HEAD
             container_site_id=container.container_site_id
+=======
+            container_site_id=container.container_site_id,
+            container_id=container.container_id
+>>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
         ))
     elif temperature >= 45:
         db.add(Notifications(
             message=f"Підвищена температура в контейнері ({temperature} °C)",
             message_type="WARNING",
+<<<<<<< HEAD
             container_site_id=container.container_site_id
+=======
+            container_site_id=container.container_site_id,
+            container_id=container.container_id
+>>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
         ))
 
 
@@ -112,16 +176,44 @@ def check_battery(battery_level: int, device, db: Session):
         db.add(Notifications(
             message="Критично низький рівень заряду батареї пристрою",
             message_type="CRITICAL",
+<<<<<<< HEAD
             container_site_id=device.container.container_site_id
+=======
+            container_site_id=device.container.container_site_id,
+            container_id=device.container.container_id
+>>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
         ))
     elif battery_level <= 20:
         db.add(Notifications(
             message="Низький рівень заряду батареї пристрою",
             message_type="WARNING",
+<<<<<<< HEAD
             container_site_id=device.container.container_site_id
         ))
 
 
+=======
+            container_site_id=device.container.container_site_id,
+            container_id=device.container.container_id
+        ))
+
+
+def update_container_status(container: Containers):
+    statuses = []
+    if container.fill_level == 0:
+        statuses.append("порожній")
+    if container.fill_level >= 90:
+        statuses.append("переповнений")
+    if container.tilted:
+        statuses.append("нахилений")
+    if container.temperature >= 60:
+        statuses.append("ризик пожежі")
+    if not statuses:
+        statuses.append("активний")
+    container.status = ",".join(statuses)
+
+
+>>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
 @router.post("/telemetry")
 def receive_telemetry(
     data: DeviceTelemetry,
@@ -154,6 +246,11 @@ def receive_telemetry(
     container.tilted = data.tilted
     container.last_update = datetime.utcnow()
 
+<<<<<<< HEAD
+=======
+    update_container_status(container)
+
+>>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
     check_fill_level(fill_level, container, db)
     check_tilt(data.tilted, container, db)
     check_temperature(temperature, container, db)
@@ -207,3 +304,38 @@ def get_device_telemetry(
         "tilted": container.tilted,
         "last_update": container.last_update
     }
+
+
+@router.delete("/{device_id}", status_code=204)
+def delete_device(
+    device_id: int,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    if role not in ("admin", "organization"):
+        raise HTTPException(403, "Access denied")
+
+    device = db.query(Devices).filter(
+        Devices.device_id == device_id
+    ).first()
+
+    if not device:
+        raise HTTPException(404, "Device not found")
+
+    if role == "organization":
+        site = (
+            db.query(ContainerSite)
+            .join(Containers)
+            .filter(Containers.container_id == device.container_id)
+            .first()
+        )
+
+        if not site or site.organization_id != entity.organization_id:
+            raise HTTPException(403, "Access denied")
+
+    db.delete(device)
+    db.commit()
+
+    return

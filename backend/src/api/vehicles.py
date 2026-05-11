@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
+from src.models.organization import Organization
 from src.database import get_db
 from src.models.vehicles import Vehicles
 from src.schemas.vehicles import (
@@ -35,11 +36,25 @@ def create_vehicle(
 
     if role == "organization":
         organization_id = entity.organization_id
-
     else:
         if data.organization_id is None:
-            raise HTTPException(400, "organization_id is required")
+            raise HTTPException(
+                status_code=400,
+                detail="organization_id is required for admin"
+            )
         organization_id = data.organization_id
+
+    organization = (
+        db.query(Organization)
+        .filter(Organization.organization_id == organization_id)
+        .first()
+    )
+
+    if not organization:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Organization with id={organization_id} not found"
+        )
 
     vehicle = Vehicles(
         vehicle_name=data.vehicle_name,
