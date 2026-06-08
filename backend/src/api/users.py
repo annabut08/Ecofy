@@ -8,6 +8,7 @@ from src.models.containers import Containers
 from src.api.auth import get_current_user
 from src.database import get_db
 from src.models.users import Users
+from src.models.cities import Cities
 from src.schemas.users import UserCreate, UserResponse, UpdateCity
 from src.api.core import hash_password
 
