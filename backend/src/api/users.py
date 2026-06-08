@@ -8,7 +8,7 @@ from src.models.containers import Containers
 from src.api.auth import get_current_user
 from src.database import get_db
 from src.models.users import Users
-from src.schemas.users import UserCreate, UserResponse
+from src.schemas.users import UserCreate, UserResponse, UpdateCity
 from src.api.core import hash_password
 
 router = APIRouter(
@@ -185,6 +185,47 @@ def get_containers_by_site(
             }
             for c in containers
         ]
+    }
+
+
+@router.get("/cities/search")
+def search_cities(
+    query: str,
+    db: Session = Depends(get_db)
+):
+    return (
+        db.query(Cities)
+        .filter(Cities.name.ilike(f"%{query}%"))
+        .limit(10)
+        .all()
+    )
+
+
+@router.put("/{user_id}/city")
+def update_user_city(
+    user_id: int,
+    request: UpdateCity,
+    db: Session = Depends(get_db)
+):
+    user = (
+        db.query(Users)
+        .filter(Users.user_id == user_id)
+        .first()
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    user.city_id = request.city_id
+
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "message": "City updated"
     }
 
 

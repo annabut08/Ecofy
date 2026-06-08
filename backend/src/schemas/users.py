@@ -8,7 +8,7 @@ class UserBase(BaseModel):
     patronymic: str | None = None
     phone_number: str | None = None
     email: EmailStr
-    city: str | None = None
+    city_id: int | None = None
 
 
 class UserCreate(UserBase):
@@ -27,6 +27,18 @@ class UserPublic(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
+
+    class Config:
+        from_attributes = True
+
+
+class UpdateCity(BaseModel):
+    city_id: int
+
+
+class CityResponse(BaseModel):
+    city_id: int
+    name: str
 
     class Config:
         from_attributes = True

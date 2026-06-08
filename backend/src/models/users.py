@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from src.database import Base
 
@@ -13,7 +13,9 @@ class Users(Base):
     password_hash = Column(String(255), nullable=False)
     phone_number = Column(String(20))
     email = Column(String(150), nullable=False)
-    city = Column(String(100))
+    city_id = Column(Integer, ForeignKey("cities.city_id"), nullable=True)
     status = Column(Boolean, default=True)
 
     notifications = relationship("Notifications", back_populates="user")
+
+    city = relationship("Cities", back_populates="users")
