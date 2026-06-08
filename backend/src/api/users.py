@@ -38,11 +38,8 @@ def register_user(
 
     new_user = Users(
         first_name=data.first_name,
-        last_name=data.last_name,
-        patronymic=data.patronymic,
         email=data.email,
         phone_number=data.phone_number,
-        city_id=data.city_id,
         password_hash=hashed_password
     )
 
