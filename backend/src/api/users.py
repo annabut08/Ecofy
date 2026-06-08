@@ -198,32 +198,30 @@ def get_containers_by_site(
     }
 
 
-@router.put("/{user_id}/city")
+@router.patch("/{user_id}/city", response_model=UserResponse)
 def update_user_city(
     user_id: int,
     request: UpdateCity,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
 ):
-    user = (
-        db.query(Users)
-        .filter(Users.user_id == user_id)
-        .first()
-    )
 
+    if current_user.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Немає доступу")
+
+    user = db.query(Users).filter(Users.user_id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
+        raise HTTPException(status_code=404, detail="Користувача не знайдено")
+
+    city = db.query(Cities).filter(Cities.id == request.city_id).first()
+    if not city:
+        raise HTTPException(status_code=404, detail="Місто не знайдено")
 
     user.city_id = request.city_id
-
     db.commit()
     db.refresh(user)
 
-    return {
-        "message": "City updated"
-    }
+    return user
 
 
 @router.get(
