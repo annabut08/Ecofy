@@ -198,19 +198,6 @@ def get_containers_by_site(
     }
 
 
-@router.get("/cities/search")
-def search_cities(
-    query: str,
-    db: Session = Depends(get_db)
-):
-    return (
-        db.query(Cities)
-        .filter(Cities.name.ilike(f"%{query}%"))
-        .limit(10)
-        .all()
-    )
-
-
 @router.put("/{user_id}/city")
 def update_user_city(
     user_id: int,
