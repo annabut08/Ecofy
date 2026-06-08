@@ -19,11 +19,20 @@ router = APIRouter(
 
 
 @router.post("/register", status_code=201)
-def register_user(data: UserCreate, db: Session = Depends(get_db)):
+def register_user(
+    data: UserCreate,
+    db: Session = Depends(get_db)
+):
 
-    existing = db.query(Users).filter(Users.email == data.email).first()
+    existing = db.query(Users).filter(
+        Users.email == data.email
+    ).first()
+
     if existing:
-        raise HTTPException(409, "User with this email already exists")
+        raise HTTPException(
+            status_code=409,
+            detail="User with this email already exists"
+        )
 
     hashed_password = hash_password(data.password)
 
@@ -33,7 +42,7 @@ def register_user(data: UserCreate, db: Session = Depends(get_db)):
         patronymic=data.patronymic,
         email=data.email,
         phone_number=data.phone_number,
-        city=data.city,
+        city_id=data.city_id,
         password_hash=hashed_password
     )
 
@@ -41,7 +50,10 @@ def register_user(data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "User registered successfully", "user_id": new_user.user_id}
+    return {
+        "message": "User registered successfully",
+        "user_id": new_user.user_id
+    }
 
 
 @router.get(
