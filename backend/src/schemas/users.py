@@ -26,7 +26,7 @@ class UserPublic(BaseModel):
     user_id: int
     email: EmailStr
     first_name: str
-    last_name: str
+    last_name: str | None = None
 
     class Config:
         from_attributes = True
