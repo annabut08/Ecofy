@@ -213,7 +213,7 @@ def update_user_city(
     if not user:
         raise HTTPException(status_code=404, detail="Користувача не знайдено")
 
-    city = db.query(Cities).filter(Cities.id == request.city_id).first()
+    city = db.query(Cities).filter(Cities.city_id == request.city_id).first()
     if not city:
         raise HTTPException(status_code=404, detail="Місто не знайдено")
 
