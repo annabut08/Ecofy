@@ -203,10 +203,13 @@ def update_user_city(
     user_id: int,
     request: UpdateCity,
     db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user)
+    current=Depends(get_current_user)  # ← прибрати тип Users
 ):
+    entity, role = current  # ← розпакувати як в інших роутах
 
-    if current_user.user_id != user_id:
+    if role != "admin" and (
+        role != "user" or entity.user_id != user_id
+    ):
         raise HTTPException(status_code=403, detail="Немає доступу")
 
     user = db.query(Users).filter(Users.user_id == user_id).first()
