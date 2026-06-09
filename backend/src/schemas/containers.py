@@ -36,3 +36,15 @@ class ContainerResponse(ContainerBase):
 
     class Config:
         from_attributes = True
+
+
+class NotificationResponse(BaseModel):
+    notification_id: int
+    message: str
+    message_type: str
+    created_at: datetime
+    container_site_id: int | None
+    container_id: int | None
+
+    class Config:
+        from_attributes = True
