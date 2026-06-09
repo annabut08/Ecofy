@@ -1,5 +1,6 @@
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from src.database import Base
 
 
@@ -15,7 +16,7 @@ class Users(Base):
     email = Column(String(150), nullable=False)
     city_id = Column(Integer, ForeignKey("cities.city_id"), nullable=True)
     status = Column(Boolean, default=True)
+    created_at = Column(DateTime, server_default=func.now())  # ← додано
 
     notifications = relationship("Notifications", back_populates="user")
-
     city = relationship("Cities", back_populates="users")
