@@ -3,13 +3,18 @@ from sqlalchemy.orm import relationship
 from src.database import Base
 
 
+from sqlalchemy import Column, Integer, Float, ForeignKey, String, Text
+from sqlalchemy.orm import relationship
+from src.database import Base
+
+
 class ContainerSite(Base):
     __tablename__ = "containersite"
 
     container_site_id = Column(Integer, primary_key=True, index=True)
     location_lat = Column(String(100), nullable=False)
     location_lng = Column(String(100), nullable=False)
-    city = Column(String(100))
+    city_id = Column(Integer, ForeignKey("cities.city_id"), nullable=True)
     street = Column(String(100))
     building = Column(String(20))
     entrance = Column(String(10))
@@ -18,8 +23,8 @@ class ContainerSite(Base):
     organization_id = Column(Integer, ForeignKey(
         "organization.organization_id", ondelete="CASCADE"))
 
-    organization = relationship(
-        "Organization", back_populates="containersite")
+    organization = relationship("Organization", back_populates="containersite")
+    city = relationship("Cities", back_populates="containersites")  # ← нове
     containers = relationship("Containers", back_populates="containersite")
     pickups = relationship("Pickups", back_populates="containersite")
     notifications = relationship(
