@@ -6,7 +6,7 @@ from datetime import datetime
 class ContainerSiteBase(BaseModel):
     location_lat: str
     location_lng: str
-    city: str | None = None
+    city_id: int | None = None
     street: str | None = None
     building: str | None = None
     entrance: str | None = None
@@ -20,7 +20,7 @@ class ContainerSiteCreate(ContainerSiteBase):
 class ContainerSiteUpdate(BaseModel):
     location_lat: str | None = None
     location_lng: str | None = None
-    city: str | None = None
+    city_id: int | None = None
     street: str | None = None
     building: str | None = None
     entrance: str | None = None

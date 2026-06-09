@@ -3,45 +3,36 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class ContainerSiteBase(BaseModel):
-    location_lat: str
-    location_lng: str
-    city_id: int | None = None  # ← замінено
-    street: str | None = None
-    building: str | None = None
-    entrance: str | None = None
-    description: str | None = None
+from typing import Optional
+from pydantic import BaseModel
+from datetime import datetime
 
 
-class ContainerSiteCreate(ContainerSiteBase):
-    organization_id: int
-
-
-class ContainerSiteUpdate(BaseModel):
-    location_lat: str | None = None
-    location_lng: str | None = None
-    city_id: int | None = None  # ← замінено
-    street: str | None = None
-    building: str | None = None
-    entrance: str | None = None
-    description: str | None = None
-
-
-class ContainerSiteResponse(ContainerSiteBase):
-    container_site_id: int
-    organization_id: int
-
-    class Config:
-        from_attributes = True
-
-
-class ContainerStatusResponse(BaseModel):
-    container_id: int
+class ContainerBase(BaseModel):
     type: str
-    capacity: int | None
-    fill_level: int | None
+    capacity: int
+    fill_level: int | None = None
+    temperature: float | None = None
     status: str
-    last_update: datetime | None
+    container_site_id: int
+
+
+class ContainerCreate(ContainerBase):
+    pass
+
+
+class ContainerUpdate(BaseModel):
+    type: str | None = None
+    capacity: int | None = None
+    fill_level: int | None = None
+    temperature: float | None = None
+    status: str | None = None
+    container_site_id: int | None = None
+
+
+class ContainerResponse(ContainerBase):
+    container_id: int
+    last_update: datetime
 
     class Config:
         from_attributes = True
