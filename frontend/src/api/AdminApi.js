@@ -15,7 +15,7 @@ export const adminApi = {
 
   // Organizations
   getOrganizations: () =>
-    axios.get(`${API}/admin/organizations`, { headers: headers() }),
+    axios.get(`${API}/organizations`, { headers: headers() }),
   createOrganization: (data) =>
     axios.post(`${API}/admin/organizations`, data, { headers: headers() }),
   deleteOrganization: (id) =>
