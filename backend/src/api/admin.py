@@ -314,7 +314,7 @@ def delete_notification(
     db.commit()
 
 
-'''@router.post("/", response_model=AdminResponse, status_code=201)
+@router.post("/", response_model=AdminResponse, status_code=201)
 def create_admin(
     data: AdminCreate,
     db: Session = Depends(get_db),
@@ -407,4 +407,3 @@ def delete_admin(
         "message": "Admin deleted successfully",
         "admin_id": admin_id
     }
-'''
