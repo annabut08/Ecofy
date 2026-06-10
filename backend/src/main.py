@@ -4,7 +4,6 @@ from src.api import users, devices, containers, organizations, disposal_requests
 from src.api import auth, client_companies, vehicles, container_sites, admin, pickups, cities, tips
 from src.api import analytics, doc
 
-
 app = FastAPI(
     title="Ecofy 🍀",
     description="Ecofy — система для управління утилізацією та вивезенням відходів",
@@ -18,14 +17,6 @@ app.add_middleware(
         "http://localhost:3000",
         "https://ecofy-beta.vercel.app",
     ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
