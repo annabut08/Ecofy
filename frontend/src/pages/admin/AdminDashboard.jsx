@@ -4,6 +4,7 @@ import Sidebar from "./components/Sidebar";
 import UsersPanel from "./panels/UsersPanel";
 import SitesPanel from "./panels/SitesPanel";
 import ContainersPanel from "./panels/ContainersPanel";
+import OrganizationPanel from "./panels/OrganizationPanel";
 import TipsPanel from "./panels/TipsPanel";
 import ExportPanel from "./panels/ExportPanel";
 import styles from "./admin.module.css";
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
 
   const panels = {
     users: <UsersPanel />,
+    organizations: <OrganizationPanel />,
     sites: <SitesPanel />,
     containers: <ContainersPanel />,
     tips: <TipsPanel />,
