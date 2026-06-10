@@ -12,3 +12,10 @@ class TipResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class TipCreate(BaseModel):
+    title: str
+    content: str | None = None
+    category: str | None = None
+    is_published: bool = True
