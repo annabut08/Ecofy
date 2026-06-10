@@ -6,15 +6,22 @@ from src.api import analytics, doc
 
 
 app = FastAPI(
-    title="Ecofy 🍀 ",
+    title="Ecofy 🍀",
     description="Ecofy — система для управління утилізацією та вивезенням відходів",
     version="1.0.0"
 )
 
-origins = [
-    "http://localhost:3000",
-    "https://ecofy-beta.vercel.app"
-]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://ecofy-beta.vercel.app",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.add_middleware(
     CORSMiddleware,

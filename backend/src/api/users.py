@@ -9,7 +9,7 @@ from src.api.auth import get_current_user
 from src.database import get_db
 from src.models.users import Users
 from src.models.cities import Cities
-from src.schemas.users import UserCreate, UserResponse, UpdateCity
+from src.schemas.users import UserCreate, UserResponse, UpdateCity, UserUpdate
 from src.api.core import hash_password
 
 router = APIRouter(
@@ -335,7 +335,7 @@ def get_user(
 @router.put("/{user_id}", response_model=UserResponse)
 def update_user(
     user_id: int,
-    data: UserCreate,
+    data: UserUpdate,  # ← замінено
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
@@ -353,7 +353,12 @@ def update_user(
     if not user:
         raise HTTPException(404, "User not found")
 
-    update_data = data.dict(exclude_unset=True)
+    update_data = data.dict(exclude_unset=True, exclude_none=True)
+
+    if "password" in update_data:
+        update_data["password_hash"] = hash_password(
+            update_data.pop("password"))
+
     for field, value in update_data.items():
         setattr(user, field, value)
 
