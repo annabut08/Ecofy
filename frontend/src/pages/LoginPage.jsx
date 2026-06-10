@@ -1,4 +1,3 @@
-// src/pages/LoginPage.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
@@ -30,14 +29,25 @@ export default function LoginPage() {
       const { access_token } = res.data;
       localStorage.setItem("token", access_token);
 
-      // Дістаємо userId з JWT
       const payload = JSON.parse(atob(access_token.split(".")[1]));
       localStorage.setItem("user_id", payload.sub);
+      localStorage.setItem("role", payload.role);
 
-      navigate("/dashboard");
+      switch (payload.role) {
+        case "admin":
+          navigate("/admin");
+          break;
+        case "organization":
+          navigate("/municipal");
+          break;
+        default:
+          navigate("/dashboard");
+      }
     } catch (err) {
-        const msg = err.response?.data?.detail;
-        setError(typeof msg === "string" ? msg : "Невірний email або пароль");
+      const msg = err.response?.data?.detail;
+      setError(typeof msg === "string" ? msg : "Невірний email або пароль");
+    } finally {
+      setLoading(false);
     }
   };
 

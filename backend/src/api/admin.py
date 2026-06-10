@@ -317,8 +317,7 @@ def delete_notification(
 @router.post("/", response_model=AdminResponse, status_code=201)
 def create_admin(
     data: AdminCreate,
-    db: Session = Depends(get_db),
-    admin=Depends(only_admin)
+    db: Session = Depends(get_db)
 ):
     existing = db.query(Admins).filter(Admins.email == data.email).first()
     if existing:
