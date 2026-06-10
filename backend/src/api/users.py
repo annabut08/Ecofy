@@ -278,7 +278,7 @@ def new_container_site_notifications(
         )
         .filter(
             Notifications.message_type == "new_container_site",
-            ContainerSite.city == user.city,
+            ContainerSite.city_id == user.city_id,
             Notifications.user_id == user.user_id
         )
         .order_by(Notifications.created_at.desc())

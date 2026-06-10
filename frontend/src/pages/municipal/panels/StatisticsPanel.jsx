@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Loader, StatCard } from "../components/MunicipalTable";
 import styles from "../municipal.module.css";
@@ -14,8 +14,7 @@ export default function StatisticsPanel() {
   const [dateTo, setDateTo] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const loadStats = () => {
-    setLoading(true);
+  const loadStats = useCallback(() => {
     const params = new URLSearchParams();
     if (dateFrom) params.append("date_from", dateFrom);
     if (dateTo) params.append("date_to", dateTo);
@@ -25,9 +24,9 @@ export default function StatisticsPanel() {
       .then((r) => setStats(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  };
+  }, [dateFrom, dateTo]);
 
-  useEffect(() => { loadStats(); }, []);
+  useEffect(() => { loadStats(); }, [loadStats]);
 
   const exportCSV = () => {
     if (!stats) return;
