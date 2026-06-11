@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
-import OverviewPanel from "./panels/OverviewPanel";
+import MapPanel from "./panels/MapPanel";
+import ContainersPanel from "./panels/ContainersPanel";
 import PickupsPanel from "./panels/PickupsPanel";
+import DevicesPanel from "./panels/DevicesPanel";
 import StatisticsPanel from "./panels/StatisticsPanel";
 import styles from "./municipal.module.css";
 
 export default function MunicipalDashboard() {
-  const [active, setActive] = useState("overview");
+  const [active, setActive] = useState("map");
   const navigate = useNavigate();
 
   const onLogout = () => {
@@ -18,8 +20,10 @@ export default function MunicipalDashboard() {
   };
 
   const panels = {
-    overview: <OverviewPanel />,
+    map: <MapPanel />,
+    containers: <ContainersPanel />,
     pickups: <PickupsPanel />,
+    devices: <DevicesPanel />,
     stats: <StatisticsPanel />,
   };
 

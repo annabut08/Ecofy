@@ -1,14 +1,18 @@
+import { useTranslation } from "react-i18next";
 import styles from "../municipal.module.css";
-
-const MENU = [
-  { id: "overview", label: "📊 Огляд" },
-  { id: "containers", label: "🗑️ Контейнери" },
-  { id: "pickups", label: "🚚 Вивози" },
-  { id: "devices", label: "⚡ Пристрої" },
-  { id: "stats", label: "📈 Статистика" },
-];
+import LanguageSwitcher from "../../../components/LanguageSwitcher";
 
 export default function Sidebar({ active, setActive, onLogout }) {
+  const { t } = useTranslation();
+
+  const MENU = [
+    { id: "map", label: "🗺️ " + t("municipal.overview") },
+    { id: "containers", label: "🗑️ " + t("municipal.containers") },
+    { id: "pickups", label: "🚚 " + t("municipal.pickups") },
+    { id: "devices", label: "⚡ " + t("municipal.devices") },
+    { id: "stats", label: "📈 " + t("municipal.stats") },
+  ];
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.sidebarLogo}>🌿 Ecofy Org</div>
@@ -23,8 +27,11 @@ export default function Sidebar({ active, setActive, onLogout }) {
           </button>
         ))}
       </nav>
+      <div style={{ padding: "0 12px", marginBottom: 12 }}>
+        <LanguageSwitcher />
+      </div>
       <button className={styles.logoutBtn} onClick={onLogout}>
-        🚪 Вийти
+        🚪 {t("common.logout")}
       </button>
     </aside>
   );
