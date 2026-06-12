@@ -111,5 +111,11 @@
     "containers": "Containers",
     "tips": "Tips",
     "notifications": "Notifications"
+  },
+  "company": {
+    "requests": "Requests",
+    "stats": "Statistics",
+    "profile": "Profile",
+    "business": "Business"
   }
 }

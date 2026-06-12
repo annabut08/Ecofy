@@ -111,5 +111,11 @@
     "containers": "Контейнери",
     "tips": "Поради",
     "notifications": "Сповіщення"
+  },
+   "company": {
+    "requests": "Заявки",
+    "stats": "Статистика",
+    "profile": "Профіль",
+    "business": "Бізнес"
   }
 }
