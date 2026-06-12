@@ -1,37 +1,49 @@
-import axios from "axios";
+import api from "./api";
 
-const API = "https://ecofy-beta.vercel.app";
-
-const headers = () => ({
+const getHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
 export const companyApi = {
   getCompany: (id) =>
-    axios.get(`${API}/client-companies/${id}`, { headers: headers() }),
+    api.get(`/client-companies/${id}`, {
+      headers: getHeaders(),
+    }),
 
   updateCompany: (id, data) =>
-    axios.put(`${API}/client-companies/${id}`, data, { headers: headers() }),
+    api.put(`/client-companies/${id}`, data, {
+      headers: getHeaders(),
+    }),
 
   registerCompany: (data) =>
-    axios.post(`${API}/client-companies/register`, data),
+    api.post(`/client-companies/register`, data),
 
   getRequests: () =>
-    axios.get(`${API}/requests/`, { headers: headers() }),
+    api.get(`/requests/`, {
+      headers: getHeaders(),
+    }),
 
   createRequest: (data) =>
-    axios.post(`${API}/requests/`, data, { headers: headers() }),
+    api.post(`/requests/`, data, {
+      headers: getHeaders(),
+    }),
 
   deleteRequest: (id) =>
-    axios.delete(`${API}/requests/${id}`, { headers: headers() }),
+    api.delete(`/requests/${id}`, {
+      headers: getHeaders(),
+    }),
 
-  getStatistics: (dateFrom, dateTo) => {
-    const params = new URLSearchParams();
-    if (dateFrom) params.append("date_from", dateFrom);
-    if (dateTo) params.append("date_to", dateTo);
-    return axios.get(`${API}/requests/statistics?${params}`, { headers: headers() });
-  },
+  getStatistics: (dateFrom, dateTo) =>
+    api.get(`/requests/statistics`, {
+      headers: getHeaders(),
+      params: {
+        ...(dateFrom && { date_from: dateFrom }),
+        ...(dateTo && { date_to: dateTo }),
+      },
+    }),
 
   getOrganizations: () =>
-    axios.get(`${API}/organizations/`, { headers: headers() }),
+    api.get(`/organizations/`, {
+      headers: getHeaders(),
+    }),
 };

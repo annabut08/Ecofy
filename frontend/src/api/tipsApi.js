@@ -1,13 +1,11 @@
-import axios from "axios";
-
-const API = "https://ecofy-beta.vercel.app";
+import api from "./axios";
 
 export const tipsApi = {
   getTips: (category) =>
-    axios.get(`${API}/tips/`, {
+    api.get("/tips/", {
       params: category ? { category } : {},
     }),
 
   getCategories: () =>
-    axios.get(`${API}/tips/categories`),
+    api.get("/tips/categories"),
 };
