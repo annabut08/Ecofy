@@ -4,11 +4,13 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import MunicipalDashboard from "./pages/municipal/MunicipalDashboard";
+import CompanyDashboard from "./pages/company/CompanyDashboard";
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" />;
 };
+
 
 function App() {
   return (
@@ -26,7 +28,10 @@ function App() {
           <PrivateRoute>
             <MunicipalDashboard />
           </PrivateRoute>
-        } />      
+        } />  
+        <Route path="/company" element={
+          <PrivateRoute><CompanyDashboard /></PrivateRoute>
+        } />    
       </Routes>
     </BrowserRouter>
   );

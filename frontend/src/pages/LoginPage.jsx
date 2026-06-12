@@ -40,6 +40,9 @@ export default function LoginPage() {
         case "organization":
           navigate("/municipal");
           break;
+        case "client_company":
+          navigate("/company");
+          break;
         default:
           navigate("/dashboard");
       }
