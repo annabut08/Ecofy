@@ -1,18 +1,29 @@
 import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import { Th, Td, Loader, BadgeGreen, BadgeRed, BadgeYellow } from "../components/CompanyTable";
+import { companyApi } from "../../../api/companyApi";
 import styles from "../company.module.css";
 
-const API = "https://ecofy-beta.vercel.app";
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
+const WASTE_TYPES = ["Пластик", "Скло", "Папір", "Метал", "Електроніка", "Інше"];
+
+const EMPTY_FORM = {
+  waste_type: "Пластик",
+  waste_description: "",
+  amount_kg: "",
+  organization_id: "",
+};
 
 const STATUS_LABELS = {
-  pending: "Очікує",
-  approved: "Схвалено",
-  rejected: "Відхилено",
+  pending:   "Очікує",
+  approved:  "Схвалено",
+  rejected:  "Відхилено",
   completed: "Завершено",
+};
+
+const getStatusBadge = (status) => {
+  const label = STATUS_LABELS[status] ?? status;
+  if (status === "approved" || status === "completed") return <BadgeGreen>{label}</BadgeGreen>;
+  if (status === "rejected") return <BadgeRed>{label}</BadgeRed>;
+  return <BadgeYellow>{label}</BadgeYellow>;
 };
 
 export default function RequestsPanel() {
@@ -20,17 +31,13 @@ export default function RequestsPanel() {
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    waste_type: "Пластик",
-    waste_description: "",
-    amount_kg: "",
-    organization_id: "",
-  });
+  const [error, setError] = useState("");
+  const [form, setForm] = useState(EMPTY_FORM);
 
   const load = useCallback(() => {
     Promise.all([
-      axios.get(`${API}/requests/`, { headers: getHeaders() }),
-      axios.get(`${API}/organizations/`, { headers: getHeaders() }),
+      companyApi.getRequests(),
+      companyApi.getOrganizations(),
     ])
       .then(([reqRes, orgRes]) => {
         setRequests(reqRes.data);
@@ -44,42 +51,34 @@ export default function RequestsPanel() {
 
   const handleAdd = async (e) => {
     e.preventDefault();
+    setError("");
     setSaving(true);
     try {
-      await axios.post(
-        `${API}/requests/`,
-        {
-          waste_type: form.waste_type,
-          waste_description: form.waste_description || null,
-          amount_kg: Number(form.amount_kg),
-          organization_id: Number(form.organization_id),
-        },
-        { headers: getHeaders() }
-      );
-      setForm({ waste_type: "Пластик", waste_description: "", amount_kg: "", organization_id: "" });
+      await companyApi.createRequest({
+        waste_type:        form.waste_type,
+        waste_description: form.waste_description || null,
+        amount_kg:         Number(form.amount_kg),
+        organization_id:   Number(form.organization_id),
+      });
+      setForm(EMPTY_FORM);
       load();
     } catch (err) {
-      console.error("Помилка створення заявки:", err);
+      const msg = err.response?.data?.detail;
+      setError(typeof msg === "string" ? msg : "Помилка створення заявки");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Видалити заявку?")) return;
+    if (!confirm("Скасувати заявку?")) return;
     try {
-      await axios.delete(`${API}/requests/${id}`, { headers: getHeaders() });
+      await companyApi.deleteRequest(id);
       load();
     } catch (err) {
-      console.error(err);
+      const msg = err.response?.data?.detail;
+      setError(typeof msg === "string" ? msg : "Помилка скасування");
     }
-  };
-
-  const getStatusBadge = (status) => {
-    const label = STATUS_LABELS[status] || status;
-    if (status === "approved" || status === "completed") return <BadgeGreen>{label}</BadgeGreen>;
-    if (status === "rejected") return <BadgeRed>{label}</BadgeRed>;
-    return <BadgeYellow>{label}</BadgeYellow>;
   };
 
   return (
@@ -88,15 +87,16 @@ export default function RequestsPanel() {
 
       <form onSubmit={handleAdd} className={styles.addForm}>
         <h3 className={styles.formTitle}>Нова заявка</h3>
+
+        {error && <div style={{ color: "#DC2626", fontSize: 14 }}>{error}</div>}
+
         <div className={styles.formRow}>
           <select
             className={styles.input}
             value={form.waste_type}
             onChange={(e) => setForm({ ...form, waste_type: e.target.value })}
           >
-            {["Пластик", "Скло", "Папір", "Метал", "Електроніка", "Інше"].map((t) => (
-              <option key={t}>{t}</option>
-            ))}
+            {WASTE_TYPES.map((t) => <option key={t}>{t}</option>)}
           </select>
 
           <input
@@ -161,23 +161,14 @@ export default function RequestsPanel() {
             ) : requests.map((r) => (
               <tr key={r.request_id} className={styles.tr}>
                 <Td>{r.request_id}</Td>
-                <Td>
-                  <span className={styles.badgeGreen}>{r.waste_type}</span>
-                </Td>
+                <Td><span className={styles.badgeGreen}>{r.waste_type}</span></Td>
                 <Td>{r.amount_kg} кг</Td>
                 <Td>{r.organization_id}</Td>
                 <Td>{getStatusBadge(r.status)}</Td>
-                <Td>
-                  {r.created_at
-                    ? new Date(r.created_at).toLocaleDateString("uk-UA")
-                    : "—"}
-                </Td>
+                <Td>{r.created_at ? new Date(r.created_at).toLocaleDateString("uk-UA") : "—"}</Td>
                 <Td>
                   {r.status === "pending" && (
-                    <button
-                      className={styles.btnDanger}
-                      onClick={() => handleDelete(r.request_id)}
-                    >
+                    <button className={styles.btnDanger} onClick={() => handleDelete(r.request_id)}>
                       Скасувати
                     </button>
                   )}

@@ -1,49 +1,38 @@
-import api from "./api";
+import axios from "axios";
 
-const getHeaders = () => ({
+const API = "https://ecofy-beta.vercel.app";
+
+const headers = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
 export const companyApi = {
-  getCompany: (id) =>
-    api.get(`/client-companies/${id}`, {
-      headers: getHeaders(),
-    }),
+  // Профіль
+  getProfile: (clientId) =>
+    axios.get(`${API}/client-companies/${clientId}`, { headers: headers() }),
 
-  updateCompany: (id, data) =>
-    api.put(`/client-companies/${id}`, data, {
-      headers: getHeaders(),
-    }),
+  updateProfile: (clientId, data) =>
+    axios.put(`${API}/client-companies/${clientId}`, data, { headers: headers() }),
 
-  registerCompany: (data) =>
-    api.post(`/client-companies/register`, data),
-
+  // Заявки
   getRequests: () =>
-    api.get(`/requests/`, {
-      headers: getHeaders(),
-    }),
+    axios.get(`${API}/requests/`, { headers: headers() }),
 
   createRequest: (data) =>
-    api.post(`/requests/`, data, {
-      headers: getHeaders(),
-    }),
+    axios.post(`${API}/requests/`, data, { headers: headers() }),
 
   deleteRequest: (id) =>
-    api.delete(`/requests/${id}`, {
-      headers: getHeaders(),
-    }),
+    axios.delete(`${API}/requests/${id}`, { headers: headers() }),
 
-  getStatistics: (dateFrom, dateTo) =>
-    api.get(`/requests/statistics`, {
-      headers: getHeaders(),
-      params: {
-        ...(dateFrom && { date_from: dateFrom }),
-        ...(dateTo && { date_to: dateTo }),
-      },
-    }),
+  // Статистика
+  getStatistics: (dateFrom, dateTo) => {
+    const params = new URLSearchParams();
+    if (dateFrom) params.append("date_from", dateFrom);
+    if (dateTo) params.append("date_to", dateTo);
+    return axios.get(`${API}/requests/statistics?${params}`, { headers: headers() });
+  },
 
+  // Організації (для форми заявки)
   getOrganizations: () =>
-    api.get(`/organizations/`, {
-      headers: getHeaders(),
-    }),
+    axios.get(`${API}/organizations/`, { headers: headers() }),
 };

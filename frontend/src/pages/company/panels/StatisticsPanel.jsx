@@ -1,58 +1,52 @@
-import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
 import { Loader, StatCard } from "../components/CompanyTable";
+import { companyApi } from "../../../api/companyApi";
+import { downloadCSV } from "../../admin/utils/csvExport";
 import styles from "../company.module.css";
 
-const API = "https://ecofy-beta.vercel.app";
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
-
 const WASTE_COLORS = {
-  "Пластик": "#2196F3",
-  "Скло": "#41B87A",
-  "Папір": "#F39C12",
-  "Метал": "#9C27B0",
-  "Електроніка": "#F44336",
-  "Інше": "#9CA3AF",
+  "Пластик":    "#2196F3",
+  "Скло":       "#41B87A",
+  "Папір":      "#F39C12",
+  "Метал":      "#9C27B0",
+  "Електроніка":"#F44336",
+  "Інше":       "#9CA3AF",
+};
+
+const STATS_LABELS = {
+  waste_type:      "Тип відходів",
+  total_requests:  "Кількість заявок",
+  total_amount_kg: "Загальний обсяг (кг)",
 };
 
 export default function StatisticsPanel() {
   const [stats, setStats] = useState([]);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
+  const [trigger, setTrigger] = useState(0);
 
-  const loadStats = useCallback(() => {
-    const params = new URLSearchParams();
-    if (dateFrom) params.append("date_from", dateFrom);
-    if (dateTo) params.append("date_to", dateTo);
+  useEffect(() => {
+    let cancelled = false;
+    companyApi.getStatistics(dateFrom, dateTo)
+      .then((r) => { if (!cancelled) setStats(r.data); })
+      .catch(console.error)
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [trigger]);
 
-    axios
-        .get(`${API}/requests/statistics?${params}`, { headers: getHeaders() })
-        .then((r) => setStats(r.data))
-        .catch(console.error)
-        .finally(() => setLoading(false));
-    }, [dateFrom, dateTo]);
+  const handleApply = () => {
+    setStats([]);
+    setTrigger((t) => t + 1);
+  };
 
-useEffect(() => { loadStats(); }, [loadStats]);
+  const handleExport = () => {
+    if (!stats.length) return;
+    downloadCSV(stats, "waste_statistics.csv", STATS_LABELS);
+  };
 
   const totalKg = stats.reduce((s, i) => s + (i.total_amount_kg ?? 0), 0);
   const totalRequests = stats.reduce((s, i) => s + (i.total_requests ?? 0), 0);
-
-  const exportCSV = () => {
-    if (!stats.length) return;
-    const rows = [
-      "Тип відходів,Кількість заявок,Загальний обсяг (кг)",
-      ...stats.map((s) => `${s.waste_type},${s.total_requests},${s.total_amount_kg ?? 0}`),
-    ].join("\n");
-    const blob = new Blob([rows], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "waste_statistics.csv";
-    a.click();
-  };
 
   return (
     <div>
@@ -61,40 +55,30 @@ useEffect(() => { loadStats(); }, [loadStats]);
       <div className={styles.filterRow}>
         <div>
           <label className={styles.filterLabel}>Від</label>
-          <input
-            className={styles.input}
-            type="date"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-          />
+          <input className={styles.input} type="date" value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)} />
         </div>
         <div>
           <label className={styles.filterLabel}>До</label>
-          <input
-            className={styles.input}
-            type="date"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-          />
+          <input className={styles.input} type="date" value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)} />
         </div>
-        <button className={styles.btnPrimary} onClick={loadStats}>
+        <button className={styles.btnPrimary} onClick={handleApply}>
           Застосувати
         </button>
-        <button className={styles.btnOutline} onClick={exportCSV}>
+        <button className={styles.btnOutline} onClick={handleExport} disabled={!stats.length}>
           📥 Експорт CSV
         </button>
       </div>
 
       {loading ? <Loader /> : (
         <>
-          {/* Загальна статистика */}
           <div className={styles.statsGrid} style={{ marginBottom: 32 }}>
-            <StatCard icon="📦" value={totalRequests} label="Всього заявок" color="#2196F3" />
+            <StatCard icon="📦" value={totalRequests}    label="Всього заявок"      color="#2196F3" />
             <StatCard icon="⚖️" value={`${totalKg} кг`} label="Здано вторсировини" color="#41B87A" />
-            <StatCard icon="♻️" value={stats.length} label="Типів відходів" color="#F39C12" />
+            <StatCard icon="♻️" value={stats.length}     label="Типів відходів"     color="#F39C12" />
           </div>
 
-          {/* Таблиця по типах */}
           {stats.length > 0 ? (
             <>
               <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>
@@ -111,7 +95,7 @@ useEffect(() => { loadStats(); }, [loadStats]);
                 </thead>
                 <tbody>
                   {stats.map((s) => {
-                    const color = WASTE_COLORS[s.waste_type] || "#9CA3AF";
+                    const color = WASTE_COLORS[s.waste_type] ?? "#9CA3AF";
                     const pct = totalKg > 0
                       ? Math.round(((s.total_amount_kg ?? 0) / totalKg) * 100)
                       : 0;
@@ -132,10 +116,8 @@ useEffect(() => { loadStats(); }, [loadStats]);
                         <td className={styles.td}>
                           <div className={styles.progressWrap}>
                             <div className={styles.progressTrack}>
-                              <div
-                                className={styles.progressBar}
-                                style={{ width: `${pct}%`, background: color }}
-                              />
+                              <div className={styles.progressBar}
+                                style={{ width: `${pct}%`, background: color }} />
                             </div>
                             <span className={styles.progressLabel}>{pct}%</span>
                           </div>

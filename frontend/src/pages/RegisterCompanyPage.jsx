@@ -99,18 +99,18 @@ export default function RegisterCompanyPage() {
   const currentFields = STEPS[step].fields;
 
   return (
-    <div style={styles.root}>
-      <div style={styles.card}>
+    <div className={styles.root}>
+      <div className={styles.card}>
         {/* Logo */}
-        <div style={styles.logo}>🟡 Ecofy Бізнес</div>
-        <h1 style={styles.title}>Реєстрація компанії</h1>
+        <div className={styles.logo}>🟡 Ecofy Бізнес</div>
+        <h1 className={styles.title}>Реєстрація компанії</h1>
 
         {/* Stepper */}
-        <div style={styles.stepper}>
+        <div className={styles.stepper}>
         {STEPS.map((st, i) => (
-          <div key={i} style={styles.stepItem}>
+          <div key={i} className={styles.stepItem}>
             <div
-              style={{
+              className={{
                 ...styles.stepDot,
                 background: i <= step ? "#D97706" : "#E5E7EB",
                 color: i <= step ? "#fff" : "#9CA3AF",
@@ -120,7 +120,7 @@ export default function RegisterCompanyPage() {
             </div>
 
             <span
-              style={{
+              className={{
                 ...styles.stepLabel,
                 color: i === step ? "#D97706" : "#9CA3AF",
                 fontWeight: i === step ? 700 : 500,
@@ -132,21 +132,21 @@ export default function RegisterCompanyPage() {
         ))}
       </div>
 
-        {error && <div style={styles.error}>{error}</div>}
+        {error && <div className={styles.error}>{error}</div>}
 
         <form onSubmit={step === STEPS.length - 1 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
-          <div style={styles.fields}>
+          <div className={styles.fields}>
             {currentFields.map((key) => {
               const cfg = FIELDS_CONFIG[key];
               return (
                 <div key={key}>
-                  <label style={styles.label}>{cfg.label}</label>
+                  <label className={styles.label}>{cfg.label}</label>
                   {cfg.type === "select" ? (
                     <select
                       name={key}
                       value={form[key]}
                       onChange={handleChange}
-                      style={styles.input}
+                      className={styles.input}
                     >
                       {cfg.options.map((o) => (
                         <option key={o}>{o}</option>
@@ -154,7 +154,7 @@ export default function RegisterCompanyPage() {
                     </select>
                   ) : (
                     <input
-                      style={styles.input}
+                      className={styles.input}
                       type={cfg.type}
                       name={key}
                       placeholder={cfg.placeholder}
@@ -167,15 +167,15 @@ export default function RegisterCompanyPage() {
             })}
           </div>
 
-          <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+          <div className={{ display: "flex", gap: 12, marginTop: 8 }}>
             {step > 0 && (
-              <button type="button" style={styles.btnBack} onClick={handleBack}>
+              <button type="button" className={styles.btnBack} onClick={handleBack}>
                 ← Назад
               </button>
             )}
             <button
               type="submit"
-              style={styles.btnPrimary}
+              className={styles.btnPrimary}
               disabled={loading}
             >
               {step === STEPS.length - 1
@@ -185,13 +185,13 @@ export default function RegisterCompanyPage() {
           </div>
         </form>
 
-        <p style={styles.footer}>
+        <p className={styles.footer}>
           Вже є акаунт?{" "}
-          <Link to="/login" style={styles.link}>Увійти</Link>
+          <Link to="/login" className={styles.link}>Увійти</Link>
         </p>
-        <p style={styles.footer}>
+        <p className={styles.footer}>
           Реєстрація як користувач?{" "}
-          <Link to="/register" style={styles.link}>Звичайна реєстрація</Link>
+          <Link to="/register" className={styles.link}>Звичайна реєстрація</Link>
         </p>
       </div>
     </div>
