@@ -19,6 +19,7 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
     user_id: int
     created_at: datetime | None = None
+    status: bool = True  # ← додати
 
     class Config:
         from_attributes = True
