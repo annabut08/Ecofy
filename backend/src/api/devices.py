@@ -1,6 +1,5 @@
 from datetime import datetime
-from http.client import HTTPException
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from src.models.notifications import Notifications
