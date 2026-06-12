@@ -18,20 +18,34 @@ export const adminApi = {
     axios.get(`${API}/organizations`, { headers: headers() }),
   createOrganization: (data) =>
     axios.post(`${API}/admin/organizations`, data, { headers: headers() }),
+  updateOrganization: (id, data) =>
+    axios.put(`${API}/organizations/${id}`, data, { headers: headers() }),
   deleteOrganization: (id) =>
     axios.delete(`${API}/admin/organizations/${id}`, { headers: headers() }),
   updateOrgStatus: (id, status) =>
     axios.patch(`${API}/admin/organizations/${id}/status`, { status }, { headers: headers() }),
 
+  // Client Companies
+  getCompanies: () =>
+    axios.get(`${API}/admin/client-companies`, { headers: headers() }),
+  deleteCompany: (id) =>
+    axios.delete(`${API}/admin/client-companies/${id}`, { headers: headers() }),
+  updateCompanyStatus: (id, status) =>
+    axios.patch(`${API}/admin/client-companies/${id}/status`, { status }, { headers: headers() }),
+
   // Sites
   getSites: () =>
     axios.get(`${API}/container-sites/`, { headers: headers() }),
+  createSite: (data) =>
+    axios.post(`${API}/container-sites/`, data, { headers: headers() }),
   deleteSite: (id) =>
     axios.delete(`${API}/container-sites/${id}`, { headers: headers() }),
 
   // Containers
   getContainers: () =>
     axios.get(`${API}/containers/`, { headers: headers() }),
+  createContainer: (data) =>
+    axios.post(`${API}/containers/`, data, { headers: headers() }),
   deleteContainer: (id) =>
     axios.delete(`${API}/containers/${id}`, { headers: headers() }),
 
@@ -42,9 +56,4 @@ export const adminApi = {
   deleteTip: (id) =>
     axios.delete(`${API}/tips/${id}`, { headers: headers() }),
 
-  // Notifications
-  getNotifications: () =>
-    axios.get(`${API}/admin/admin/notifications`, { headers: headers() }),
-  deleteNotification: (id) =>
-    axios.delete(`${API}/admin/admin/notifications/${id}`, { headers: headers() }),
 };
