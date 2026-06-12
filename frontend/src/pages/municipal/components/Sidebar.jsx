@@ -14,29 +14,25 @@ export default function Sidebar({ active, setActive, onLogout }) {
   ];
 
   return (
-  <aside className={styles.sidebar}>
-    <div className={styles.sidebarHeader}>
+    <aside className={styles.sidebar}>
       <div className={styles.sidebarLogo}>🌿 Ecofy Org</div>
-      <LanguageSwitcher />
-    </div>
-
-    <nav className={styles.sidebarNav}>
-      {MENU.map((m) => (
-        <button
-          key={m.id}
-          className={`${styles.sidebarItem} ${
-            active === m.id ? styles.sidebarItemActive : ""
-          }`}
-          onClick={() => setActive(m.id)}
-        >
-          {m.label}
-        </button>
-      ))}
-    </nav>
-
-    <button className={styles.logoutBtn} onClick={onLogout}>
-      🚪 {t("common.logout")}
-    </button>
-  </aside>
+      <nav className={styles.sidebarNav}>
+        {MENU.map((m) => (
+          <button
+            key={m.id}
+            className={`${styles.sidebarItem} ${active === m.id ? styles.sidebarItemActive : ""}`}
+            onClick={() => setActive(m.id)}
+          >
+            {m.label}
+          </button>
+        ))}
+      </nav>
+      <div style={{ padding: "0 12px", marginBottom: 12 }}>
+        <LanguageSwitcher />
+      </div>
+      <button className={styles.logoutBtn} onClick={onLogout}>
+        🚪 {t("common.logout")}
+      </button>
+    </aside>
   );
 }
