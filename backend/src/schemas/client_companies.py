@@ -1,6 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, field_validator
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 
@@ -35,6 +34,16 @@ class ClientCompanyResponse(ClientCompanyBase):
     client_id: int
     email: EmailStr
     edrpou: str
+    status: bool = True
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def parse_status(cls, v):
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.lower() in ("true", "active", "1")
+        return bool(v)
 
     class Config:
         from_attributes = True
