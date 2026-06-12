@@ -2,11 +2,11 @@ import styles from "../admin.module.css";
 
 const MENU = [
   { id: "users", label: "👤 Користувачі" },
+  { id: "companies", label: "🏭 Компанії-клієнти" },
   { id: "organizations", label: "🏢 Організації" },
   { id: "sites", label: "📍 Майданчики" },
   { id: "containers", label: "🗑️ Контейнери" },
   { id: "tips", label: "♻️ Поради" },
-  { id: "notifications", label: "🔔 Сповіщення" },
   { id: "export", label: "📥 Експорт" },
 ];
 
