@@ -11,6 +11,13 @@ const getHeaders = () => ({
 export default function ContainersPanel() {
   const [containers, setContainers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [newContainer, setNewContainer] = useState({
+  type: "",
+  container_site_id: "",
+  fill_level: 0,
+  status: "active",
+  });
+  
 
   const load = useCallback(() => {
     axios
@@ -22,11 +29,90 @@ export default function ContainersPanel() {
 
   useEffect(() => { load(); }, [load]);
 
+    const createContainer = async () => {
+    try {
+      await axios.post(
+        `${API}/containers/`,
+        {
+          type: newContainer.type,
+          container_site_id: Number(newContainer.container_site_id),
+          fill_level: Number(newContainer.fill_level),
+          status: newContainer.status,
+        },
+        { headers: getHeaders() }
+      );
+
+      setNewContainer({
+        type: "",
+        container_site_id: "",
+        fill_level: 0,
+        status: "active",
+      });
+
+      load();
+    } catch (error) {
+      console.error(error);
+      alert("Не вдалося створити контейнер");
+    }
+  };
+
+  const deleteContainer = async (id) => {
+    if (!window.confirm("Видалити контейнер?")) return;
+
+    try {
+      await axios.delete(
+        `${API}/containers/${id}`,
+        { headers: getHeaders() }
+      );
+
+      load();
+    } catch (error) {
+      console.error(error);
+      alert("Не вдалося видалити контейнер");
+    }
+  };
+
   if (loading) return <Loader />;
 
   return (
     <div>
       <h2 className={styles.panelTitle}>Контейнери в реальному часі</h2>
+      <div className={styles.addForm}>
+  <h3 className={styles.formTitle}>Створити контейнер</h3>
+    <div className={styles.formRow}>
+      <input
+        className={styles.input}
+        placeholder="Тип"
+        value={newContainer.type}
+        onChange={(e) =>
+          setNewContainer({
+            ...newContainer,
+            type: e.target.value,
+          })
+        }
+      />
+
+      <input
+        className={styles.input}
+        type="number"
+        placeholder="ID майданчика"
+        value={newContainer.container_site_id}
+        onChange={(e) =>
+          setNewContainer({
+            ...newContainer,
+            container_site_id: e.target.value,
+          })
+        }
+      />
+
+      <button
+        className={styles.btnPrimary}
+        onClick={createContainer}
+      >
+        ➕ Створити
+      </button>
+    </div>
+  </div>
       <table className={styles.table}>
         <thead>
           <tr>
@@ -35,6 +121,7 @@ export default function ContainersPanel() {
             <Th>Майданчик</Th>
             <Th>Заповнення</Th>
             <Th>Статус</Th>
+            <Th>Дії</Th>
           </tr>
         </thead>
         <tbody>
@@ -69,6 +156,14 @@ export default function ContainersPanel() {
                   ? <BadgeGreen>{c.status}</BadgeGreen>
                   : <BadgeRed>{c.status}</BadgeRed>}
               </Td>
+              <Td>
+              <button
+                className={styles.btnDanger}
+                onClick={() => deleteContainer(c.container_id)}
+              >
+                🗑 Видалити
+              </button>
+            </Td>
             </tr>
           ))}
         </tbody>

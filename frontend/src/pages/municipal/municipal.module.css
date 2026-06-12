@@ -225,14 +225,13 @@
 .btnPrimary {
   background: #41B87A;
   color: #fff;
-  border: none;
+  border: 3px solid transparent;
   border-radius: 8px;
   padding: 10px 20px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
-  align-self: flex-start;
 }
 
 .btnPrimary:hover { background: #2E9E63; }

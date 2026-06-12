@@ -6,14 +6,14 @@ export default function Sidebar({ active, setActive, onLogout }) {
   const { t } = useTranslation();
 
   const MENU = [
-    { id: "requests", label: "📋 " + (t("company.requests") || "Заявки") },
-    { id: "stats", label: "📊 " + (t("company.stats") || "Статистика") },
-    { id: "profile", label: "🏢 " + (t("company.profile") || "Профіль") },
+    { id: "requests", label: "📋 " + (t("company.requests")) },
+    { id: "stats", label: "📊 " + (t("company.stats")) },
+    { id: "profile", label: "🏢 " + (t("company.profile")) },
   ];
 
   return (
     <aside className={styles.sidebar}>
-      <div className={styles.sidebarLogo}>🌿 Ecofy Бізнес</div>
+      <div className={styles.sidebarLogo}>🌿 Ecofy {t("company.business")}</div>
       <nav className={styles.sidebarNav}>
         {MENU.map((m) => (
           <button
@@ -29,7 +29,7 @@ export default function Sidebar({ active, setActive, onLogout }) {
         <LanguageSwitcher />
       </div>
       <button className={styles.logoutBtn} onClick={onLogout}>
-        🚪 {t("common.logout") || "Вийти"}
+        🚪 {t("common.logout")}
       </button>
     </aside>
   );

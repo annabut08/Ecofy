@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import styles from "./RegisterCompanyPage.module.css";
 
 const API = "https://ecofy-beta.vercel.app";
 
@@ -98,55 +99,54 @@ export default function RegisterCompanyPage() {
   const currentFields = STEPS[step].fields;
 
   return (
-    <div style={s.root}>
-      <div style={s.card}>
+    <div style={styles.root}>
+      <div style={styles.card}>
         {/* Logo */}
-        <div style={s.logo}>🟡 Ecofy Бізнес</div>
-        <h1 style={s.title}>Реєстрація компанії</h1>
+        <div style={styles.logo}>🟡 Ecofy Бізнес</div>
+        <h1 style={styles.title}>Реєстрація компанії</h1>
 
         {/* Stepper */}
-        <div style={s.stepper}>
-          {STEPS.map((st, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{
-                ...s.stepDot,
+        <div style={styles.stepper}>
+        {STEPS.map((st, i) => (
+          <div key={i} style={styles.stepItem}>
+            <div
+              style={{
+                ...styles.stepDot,
                 background: i <= step ? "#D97706" : "#E5E7EB",
                 color: i <= step ? "#fff" : "#9CA3AF",
-              }}>
-                {i < step ? "✓" : i + 1}
-              </div>
-              <span style={{
-                fontSize: 13, fontWeight: i === step ? 700 : 400,
-                color: i === step ? "#D97706" : "#9CA3AF",
-              }}>
-                {st.title}
-              </span>
-              {i < STEPS.length - 1 && (
-                <div style={{
-                  width: 32, height: 2, borderRadius: 99,
-                  background: i < step ? "#D97706" : "#E5E7EB",
-                  margin: "0 4px",
-                }} />
-              )}
+              }}
+            >
+              {i < step ? "✓" : i + 1}
             </div>
-          ))}
-        </div>
 
-        {error && <div style={s.error}>{error}</div>}
+            <span
+              style={{
+                ...styles.stepLabel,
+                color: i === step ? "#D97706" : "#9CA3AF",
+                fontWeight: i === step ? 700 : 500,
+              }}
+            >
+              {st.title}
+            </span>
+          </div>
+        ))}
+      </div>
+
+        {error && <div style={styles.error}>{error}</div>}
 
         <form onSubmit={step === STEPS.length - 1 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
-          <div style={s.fields}>
+          <div style={styles.fields}>
             {currentFields.map((key) => {
               const cfg = FIELDS_CONFIG[key];
               return (
                 <div key={key}>
-                  <label style={s.label}>{cfg.label}</label>
+                  <label style={styles.label}>{cfg.label}</label>
                   {cfg.type === "select" ? (
                     <select
                       name={key}
                       value={form[key]}
                       onChange={handleChange}
-                      style={s.input}
+                      style={styles.input}
                     >
                       {cfg.options.map((o) => (
                         <option key={o}>{o}</option>
@@ -154,7 +154,7 @@ export default function RegisterCompanyPage() {
                     </select>
                   ) : (
                     <input
-                      style={s.input}
+                      style={styles.input}
                       type={cfg.type}
                       name={key}
                       placeholder={cfg.placeholder}
@@ -169,13 +169,13 @@ export default function RegisterCompanyPage() {
 
           <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
             {step > 0 && (
-              <button type="button" style={s.btnBack} onClick={handleBack}>
+              <button type="button" style={styles.btnBack} onClick={handleBack}>
                 ← Назад
               </button>
             )}
             <button
               type="submit"
-              style={s.btnPrimary}
+              style={styles.btnPrimary}
               disabled={loading}
             >
               {step === STEPS.length - 1
@@ -185,80 +185,16 @@ export default function RegisterCompanyPage() {
           </div>
         </form>
 
-        <p style={s.footer}>
+        <p style={styles.footer}>
           Вже є акаунт?{" "}
-          <Link to="/login" style={s.link}>Увійти</Link>
+          <Link to="/login" style={styles.link}>Увійти</Link>
         </p>
-        <p style={s.footer}>
+        <p style={styles.footer}>
           Реєстрація як користувач?{" "}
-          <Link to="/register" style={s.link}>Звичайна реєстрація</Link>
+          <Link to="/register" style={styles.link}>Звичайна реєстрація</Link>
         </p>
       </div>
     </div>
   );
 }
 
-const s = {
-  root: {
-    minHeight: "100vh",
-    background: "#FFFDF7",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 16,
-  },
-  card: {
-    background: "#fff",
-    borderRadius: 20,
-    padding: "48px 40px",
-    width: "100%",
-    maxWidth: 480,
-    boxShadow: "0 8px 40px rgba(217,119,6,0.1)",
-    border: "1px solid #FDE68A",
-  },
-  logo: {
-    fontSize: 20, fontWeight: 800, color: "#D97706",
-    marginBottom: 16, textAlign: "center",
-  },
-  title: {
-    fontSize: 26, fontWeight: 900, margin: "0 0 24px",
-    letterSpacing: "-0.5px", textAlign: "center", color: "#1C1C1C",
-  },
-  stepper: {
-    display: "flex", alignItems: "center", justifyContent: "center",
-    gap: 4, marginBottom: 28, flexWrap: "wrap",
-  },
-  stepDot: {
-    width: 28, height: 28, borderRadius: "50%",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    fontSize: 13, fontWeight: 700, flexShrink: 0,
-  },
-  fields: { display: "flex", flexDirection: "column", gap: 14, marginBottom: 20 },
-  label: {
-    display: "block", fontSize: 13, fontWeight: 600,
-    color: "#374151", marginBottom: 6,
-  },
-  input: {
-    width: "100%", border: "1.5px solid #FDE68A",
-    borderRadius: 10, padding: "11px 14px", fontSize: 15,
-    outline: "none", background: "#FFFDF7", boxSizing: "border-box",
-    fontFamily: "inherit", color: "#1C1C1C",
-  },
-  btnPrimary: {
-    flex: 1, background: "#D97706", color: "#fff",
-    border: "none", borderRadius: 10, padding: "13px",
-    fontSize: 15, fontWeight: 700, cursor: "pointer",
-  },
-  btnBack: {
-    background: "#FEF3C7", color: "#D97706",
-    border: "none", borderRadius: 10, padding: "13px 20px",
-    fontSize: 15, fontWeight: 600, cursor: "pointer",
-  },
-  error: {
-    background: "#FEF2F2", color: "#DC2626",
-    borderRadius: 8, padding: "10px 14px",
-    fontSize: 14, marginBottom: 16, border: "1px solid #FECACA",
-  },
-  footer: { textAlign: "center", marginTop: 16, fontSize: 14, color: "#6B7280" },
-  link: { color: "#D97706", fontWeight: 600, textDecoration: "none" },
-};
