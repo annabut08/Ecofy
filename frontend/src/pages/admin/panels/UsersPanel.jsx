@@ -32,7 +32,7 @@ export default function UsersPanel() {
   return (
     <div>
       <h2 className={styles.panelTitle}>Користувачі</h2>
-      <table className={styles.table}>
+      <div className={styles.tableWrapper}><table className={styles.table}>
         <thead>
           <tr>
             <Th>ID</Th>
@@ -74,7 +74,7 @@ export default function UsersPanel() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </div>
   );
 }

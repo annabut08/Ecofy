@@ -74,7 +74,7 @@ export default function TipsPanel() {
       </form>
 
       {loading ? <Loader /> : (
-        <table className={styles.table}>
+        <div className={styles.tableWrapper}><table className={styles.table}>
           <thead>
             <tr>
               <Th>ID</Th><Th>Заголовок</Th><Th>Категорія</Th><Th>Статус</Th><Th>Дія</Th>
@@ -95,7 +95,7 @@ export default function TipsPanel() {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table></div>
       )}
     </div>
   );
