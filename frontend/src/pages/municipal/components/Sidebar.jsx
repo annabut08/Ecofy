@@ -10,6 +10,7 @@ export default function Sidebar({ active, setActive, onLogout }) {
     { id: "containers", label: "🗑️ " + t("municipal.containers") },
     { id: "pickups", label: "🚚 " + t("municipal.pickups") },
     { id: "devices", label: "⚡ " + t("municipal.devices") },
+    { id: "requests", label: "⚡ " + t("municipal.requests") },
     { id: "stats", label: "📈 " + t("municipal.stats") },
   ];
 

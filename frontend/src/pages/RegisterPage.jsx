@@ -53,18 +53,18 @@ export default function RegisterPage() {
   };
 
   return (
-    <div style={styles.root}>
-      <div style={styles.card}>
-        <div style={styles.logo}>🌿 Ecofy</div>
-        <h1 style={styles.title}>Реєстрація</h1>
-        <p style={styles.sub}>Створи акаунт та починай сортувати</p>
+    <div className={styles.root}>
+      <div className={styles.card}>
+        <div className={styles.logo}>🌿 Ecofy</div>
+        <h1 className={styles.title}>Реєстрація</h1>
+        <p className={styles.sub}>Створи акаунт та починай сортувати</p>
 
-        {error && <div style={styles.error}>{error}</div>}
+        {error && <div className={styles.error}>{error}</div>}
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <label style={styles.label}>Ім'я</label>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <label className={styles.label}>Ім'я</label>
           <input
-            style={styles.input}
+            className={styles.input}
             type="text"
             name="first_name"
             placeholder="Твоє ім'я"
@@ -73,9 +73,9 @@ export default function RegisterPage() {
             required
           />
 
-          <label style={styles.label}>Email</label>
+          <label className={styles.label}>Email</label>
           <input
-            style={styles.input}
+            className={styles.input}
             type="email"
             name="email"
             placeholder="name@email.com"
@@ -84,9 +84,9 @@ export default function RegisterPage() {
             required
           />
 
-          <label style={styles.label}>Пароль</label>
+          <label className={styles.label}>Пароль</label>
           <input
-            style={styles.input}
+            className={styles.input}
             type="password"
             name="password"
             placeholder="Мінімум 6 символів"
@@ -95,9 +95,9 @@ export default function RegisterPage() {
             required
           />
 
-          <label style={styles.label}>Підтвердіть пароль</label>
+          <label className={styles.label}>Підтвердіть пароль</label>
           <input
-            style={styles.input}
+            className={styles.input}
             type="password"
             name="confirm_password"
             placeholder="Повторіть пароль"
@@ -106,14 +106,14 @@ export default function RegisterPage() {
             required
           />
 
-          <button style={styles.btn} type="submit" disabled={loading}>
+          <button className={styles.btn} type="submit" disabled={loading}>
             {loading ? "Завантаження..." : "Зареєструватись"}
           </button>
         </form>
 
-        <p style={styles.footer}>
+        <p className={styles.footer}>
           Вже є акаунт?{" "}
-          <Link to="/login" style={styles.link}>
+          <Link to="/login" className={styles.link}>
             Увійти
           </Link>
         </p>

@@ -258,6 +258,30 @@
   cursor: pointer;
 }
 
+.btnPrimary {
+  background: #F3F4F6;
+  color: #374151;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btnWarning {
+  background: #FEF3C7;
+  color: #D97706;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
 .btnDanger {
   background: #FEF2F2;
   color: #DC2626;

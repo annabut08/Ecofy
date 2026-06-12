@@ -85,7 +85,8 @@
     "pending": "Pending",
     "mySites": "My sites",
     "normal": "Normal",
-    "tilted": "Tilted"
+    "tilted": "Tilted",
+    "requests": "Requests"
   },
   "home": {
     "welcome": "Welcome",

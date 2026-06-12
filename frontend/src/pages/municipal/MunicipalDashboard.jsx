@@ -5,6 +5,7 @@ import MapPanel from "./panels/MapPanel";
 import ContainersPanel from "./panels/ContainersPanel";
 import PickupsPanel from "./panels/PickupsPanel";
 import DevicesPanel from "./panels/DevicesPanel";
+import RequestsPanel from "./panels/RequestsPanel";
 import StatisticsPanel from "./panels/StatisticsPanel";
 import styles from "./municipal.module.css";
 
@@ -24,6 +25,7 @@ export default function MunicipalDashboard() {
     containers: <ContainersPanel />,
     pickups: <PickupsPanel />,
     devices: <DevicesPanel />,
+    requests: <RequestsPanel />,
     stats: <StatisticsPanel />,
   };
 

@@ -37,7 +37,7 @@ export default function DevicesPanel() {
         device_name: newDevice.device_name,
         serial_number: newDevice.serial_number,
         device_type: newDevice.device_type,
-        container_id: Number(newDevice.container_id),
+        container_id: newDevice.container_id ? Number(newDevice.container_id) : null,
         battery_level: Number(newDevice.battery_level),
       },
       { headers: getHeaders() }
