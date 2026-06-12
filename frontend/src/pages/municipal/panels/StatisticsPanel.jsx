@@ -1,48 +1,74 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Loader, StatCard } from "../components/MunicipalTable";
+import { downloadCSV } from "../../../utils/csvExport";
 import styles from "../municipal.module.css";
 
 const API = "https://ecofy-beta.vercel.app";
 const getHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
-
+ 
+const STATS_LABELS = {
+  total_pickups: "Всього вивозів",
+  completed_pickups: "Завершених",
+  pending_pickups: "Очікується",
+  completion_rate: "Виконання %",
+  date_from: "Період від",
+  date_to: "Період до",
+};
+ 
 export default function StatisticsPanel() {
   const [stats, setStats] = useState(null);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const loadStats = useCallback(() => {
+  const [trigger, setTrigger] = useState(0);
+ 
+  useEffect(() => {
     const params = new URLSearchParams();
     if (dateFrom) params.append("date_from", dateFrom);
     if (dateTo) params.append("date_to", dateTo);
-
+ 
+    let cancelled = false;
+ 
     axios
       .get(`${API}/pickups/statistics?${params}`, { headers: getHeaders() })
-      .then((r) => setStats(r.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [dateFrom, dateTo]);
-
-  useEffect(() => { loadStats(); }, [loadStats]);
-
-  const exportCSV = () => {
-    if (!stats) return;
-    const csv = `Всього вивозів,Завершених\n${stats.total_pickups},${stats.completed_pickups}`;
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "pickup_statistics.csv";
-    a.click();
+      .then((r) => { if (!cancelled) setStats(r.data); })
+      .catch(console.error);
+ 
+    return () => { cancelled = true; };
+  }, [trigger]);
+ 
+  const handleApply = () => {
+    setStats(null); // скидаємо → показує Loader
+    setTrigger((t) => t + 1);
   };
-
+ 
+  const handleExport = () => {
+    if (!stats) return;
+    const pending = stats.total_pickups - stats.completed_pickups;
+    const rate = stats.total_pickups > 0
+      ? Math.round((stats.completed_pickups / stats.total_pickups) * 100)
+      : 0;
+ 
+    downloadCSV(
+      [{
+        total_pickups: stats.total_pickups,
+        completed_pickups: stats.completed_pickups,
+        pending_pickups: pending,
+        completion_rate: `${rate}%`,
+        date_from: dateFrom || "—",
+        date_to: dateTo || "—",
+      }],
+      "pickup_statistics.csv",
+      STATS_LABELS
+    );
+  };
+ 
   return (
     <div>
       <h2 className={styles.panelTitle}>Статистика вивозів</h2>
-
+ 
       <div className={styles.filterRow}>
         <div>
           <label className={styles.filterLabel}>Від</label>
@@ -62,15 +88,15 @@ export default function StatisticsPanel() {
             onChange={(e) => setDateTo(e.target.value)}
           />
         </div>
-        <button className={styles.btnPrimary} onClick={loadStats}>
+        <button className={styles.btnPrimary} onClick={handleApply}>
           Застосувати
         </button>
-        <button className={styles.btnOutline} onClick={exportCSV}>
+        <button className={styles.btnOutline} onClick={handleExport} disabled={!stats}>
           📥 Експорт CSV
         </button>
       </div>
-
-      {loading ? <Loader /> : stats ? (
+ 
+      {!stats ? <Loader /> : (
         <div className={styles.statsGrid}>
           <StatCard icon="🚚" value={stats.total_pickups} label="Всього вивозів" color="#2196F3" />
           <StatCard icon="✅" value={stats.completed_pickups} label="Завершених" color="#41B87A" />
@@ -89,7 +115,7 @@ export default function StatisticsPanel() {
             color="#9C27B0"
           />
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
