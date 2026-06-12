@@ -1,12 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import { Loader } from "../components/UserTable";
+import { userApi } from "../../../api/userApi";
 import styles from "../user.module.css";
 
-const API = "https://ecofy-beta.vercel.app";
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
 
 export default function NotificationsPanel() {
   const [collection, setCollection] = useState([]);
@@ -16,12 +12,12 @@ export default function NotificationsPanel() {
 
   const load = useCallback(() => {
     Promise.all([
-      axios.get(`${API}/users/notifications/collection`, { headers: getHeaders() }),
-      axios.get(`${API}/users/notifications/container-sites`, { headers: getHeaders() }),
+      userApi.getCollectionNotifications(),
+      userApi.getSiteNotifications(),
     ])
-      .then(([colRes, sitesRes]) => {
-        setCollection(colRes.data);
-        setNewSites(sitesRes.data);
+      .then(([sitesRes, contRes]) => {
+        setCollection(sitesRes.data);
+        setNewSites(contRes.data);
       })
       .catch(console.error)
       .finally(() => setLoading(false));

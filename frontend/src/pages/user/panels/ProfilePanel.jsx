@@ -1,12 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import axios from "axios";
 import { Loader } from "../components/UserTable";
+import { userApi } from "../../../api/userApi";
 import styles from "../user.module.css";
-
-const API = "https://ecofy-beta.vercel.app";
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
 
 export default function ProfilePanel() {
   const [user, setUser] = useState(null);
@@ -14,12 +9,13 @@ export default function ProfilePanel() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [form, setForm] = useState({});
+  const [citySearch, setCitySearch] = useState("");
+  const [cityResults, setCityResults] = useState([]);
 
   const userId = localStorage.getItem("user_id");
 
   useEffect(() => {
-    axios
-      .get(`${API}/users/${userId}`, { headers: getHeaders() })
+    userApi.getUser(userId)
       .then((r) => {
         setUser(r.data);
         setForm({
@@ -33,18 +29,27 @@ export default function ProfilePanel() {
       .finally(() => setLoading(false));
   }, [userId]);
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setSuccess(false);
+  useEffect(() => {
+    if (!citySearch.trim()) {
+      const timer = setTimeout(() => setCityResults([]), 0);
+      return () => clearTimeout(timer);
+    }
+    const timer = setTimeout(() => {
+      userApi.searchCities(citySearch)
+        .then((r) => setCityResults(r.data))
+        .catch(console.error);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [citySearch]);
+
+  const handleSelectCity = async (city) => {
     try {
-      await axios.put(`${API}/users/${userId}`, form, { headers: getHeaders() });
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      await userApi.updateCity(userId, city.city_id);
+      setUser((prev) => ({ ...prev, city_id: city.city_id }));
+      setCitySearch(city.name);
+      setCityResults([]);
     } catch (err) {
       console.error(err);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -55,13 +60,28 @@ export default function ProfilePanel() {
     return Math.floor((now - created) / (1000 * 60 * 60 * 24));
   }, [user]);
 
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setSuccess(false);
+    try {
+      await userApi.updateUser(userId, form);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) return <Loader />;
 
   return (
     <div>
       <h2 className={styles.panelTitle}>Мій профіль</h2>
 
-      {/* Info cards */}
+      {/* Статистика */}
       <div className={styles.statsGrid} style={{ marginBottom: 32 }}>
         <div className={styles.statCard}>
           <span className={styles.statIcon}>🌿</span>
@@ -79,11 +99,54 @@ export default function ProfilePanel() {
         </div>
       </div>
 
-      {/* Edit form */}
-      <div style={{
-        background: "#fff", borderRadius: 16, padding: 32,
-        border: "1px solid #E5F5EC",
-      }}>
+      {/* Вибір міста */}
+      <div style={{ background: "#fff", borderRadius: 16, padding: 32, border: "1px solid #E5F5EC", marginBottom: 24 }}>
+        <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: "#0D1F0D" }}>
+          📍 Змінити місто
+        </h3>
+        <div style={{ position: "relative", maxWidth: 400 }}>
+          <input
+            className={styles.input}
+            placeholder="Пошук міста..."
+            value={citySearch}
+            onChange={(e) => setCitySearch(e.target.value)}
+          />
+          {cityResults.length > 0 && (
+            <div style={{
+              position: "absolute", top: "100%", left: 0, right: 0,
+              background: "#fff", borderRadius: 10, marginTop: 4,
+              boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+              border: "1px solid #E5F5EC", zIndex: 100,
+              maxHeight: 220, overflowY: "auto",
+            }}>
+              {cityResults.map((city) => (
+                <div
+                  key={city.city_id}
+                  onClick={() => handleSelectCity(city)}
+                  style={{
+                    padding: "10px 16px", cursor: "pointer",
+                    fontSize: 14, color: "#111",
+                    borderBottom: "1px solid #F3F4F6",
+                    transition: "background 0.15s",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "#F0FAF4"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = ""}
+                >
+                  📍 {city.name}
+                  {city.region && (
+                    <span style={{ fontSize: 12, color: "#9CA3AF", marginLeft: 8 }}>
+                      {city.region}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Редагування профілю */}
+      <div style={{ background: "#fff", borderRadius: 16, padding: 32, border: "1px solid #E5F5EC" }}>
         <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24, color: "#0D1F0D" }}>
           Редагувати профіль
         </h3>

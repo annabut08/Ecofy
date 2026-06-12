@@ -6,11 +6,11 @@ export default function Sidebar({ active, setActive, onLogout, user }) {
   const { t } = useTranslation();
 
   const MENU = [
-    { id: "map", label: "🗺️ Карта" } + t("user.map") ,
-    { id: "containers", label: "🗑️ Контейнери" } + t("user.containers") ,
-    { id: "tips", label: "♻️ Поради" } + t("user.tips") ,
-    { id: "notifications", label: "🔔 Сповіщення" } + t("user.notifications") ,
-    { id: "profile", label: "👤 Профіль" } + t("user.profile") ,
+    { id: "map", label: "🗺️ " + t("user.map") },
+    { id: "containers", label: "🗑️ " + t("user.containers") },
+    { id: "tips", label: "♻️ " + t("user.tips") },
+    { id: "notifications", label: "🔔 " + t("user.notifications") },
+    { id: "profile", label: "👤 " + t("common.profile") },
   ];
 
   return (
@@ -41,7 +41,7 @@ export default function Sidebar({ active, setActive, onLogout, user }) {
         <LanguageSwitcher />
       </div>
       <button className={styles.logoutBtn} onClick={onLogout}>
-        🚪 Вийти
+        🚪 {t("common.logout")}
       </button>
     </aside>
   );

@@ -1,12 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import { Loader, Th, Td, BadgeGreen, BadgeRed, BadgeYellow, StatCard } from "../components/UserTable";
+import { userApi } from "../../../api/userApi";
 import styles from "../user.module.css";
-
-const API = "https://ecofy-beta.vercel.app";
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
 
 const WASTE_TYPES = ["Всі", "Скло", "Папір", "Пластик", "Метал"];
 
@@ -16,25 +11,13 @@ export default function ContainersPanel() {
   const [filter, setFilter] = useState("Всі");
 
   const load = useCallback(() => {
-    axios
-      .get(`${API}/users/containers/status`, { headers: getHeaders() })
+    userApi.getContainersStatus()
       .then((r) => setContainers(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { load(); }, [load]);
-
-  if (loading) return <Loader />;
-
-  const filtered = filter === "Всі"
-    ? containers
-    : containers.filter((c) => c.waste_type?.toLowerCase() === filter.toLowerCase());
-
-  const totalFull = containers.filter((c) => (c.fill_level ?? 0) >= 80).length;
-  const avgFill = containers.length > 0
-    ? Math.round(containers.reduce((s, c) => s + (c.fill_level ?? 0), 0) / containers.length)
-    : 0;
 
   const getFillColor = (fill) => {
     if (fill >= 80) return "#F39C12";
@@ -48,6 +31,17 @@ export default function ContainersPanel() {
     return <BadgeYellow>{status}</BadgeYellow>;
   };
 
+  if (loading) return <Loader />;
+
+  const filtered = filter === "Всі"
+    ? containers
+    : containers.filter((c) => c.waste_type?.toLowerCase() === filter.toLowerCase());
+
+  const totalFull = containers.filter((c) => (c.fill_level ?? 0) >= 80).length;
+  const avgFill = containers.length > 0
+    ? Math.round(containers.reduce((s, c) => s + (c.fill_level ?? 0), 0) / containers.length)
+    : 0;
+
   return (
     <div>
       <h2 className={styles.panelTitle}>Стан контейнерів</h2>
@@ -58,7 +52,6 @@ export default function ContainersPanel() {
         <StatCard icon="📊" value={`${avgFill}%`} label="Середнє заповнення" color="#2196F3" />
       </div>
 
-      {/* Фільтр по типу */}
       <div className={styles.filterRow}>
         {WASTE_TYPES.map((t) => (
           <button
@@ -91,9 +84,7 @@ export default function ContainersPanel() {
           ) : filtered.map((c) => (
             <tr key={c.container_id} className={styles.tr}>
               <Td>{c.container_id}</Td>
-              <Td>
-                <span className={styles.badgeGreen}>{c.waste_type}</span>
-              </Td>
+              <Td><span className={styles.badgeGreen}>{c.waste_type}</span></Td>
               <Td>{c.container_site?.address || "—"}</Td>
               <Td>
                 <div className={styles.progressWrap}>
@@ -106,8 +97,10 @@ export default function ContainersPanel() {
                       }}
                     />
                   </div>
-                  <span className={styles.progressLabel}
-                    style={{ color: getFillColor(c.fill_level ?? 0), fontWeight: 700 }}>
+                  <span
+                    className={styles.progressLabel}
+                    style={{ color: getFillColor(c.fill_level ?? 0), fontWeight: 700 }}
+                  >
                     {c.fill_level ?? 0}%
                   </span>
                 </div>

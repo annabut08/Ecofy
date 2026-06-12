@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import axios from "axios";
 import { Loader, StatCard } from "../components/UserTable";
 import styles from "../user.module.css";
+import { userApi } from "../../../api/userApi";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
@@ -11,11 +11,6 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
-
-const API = "https://ecofy-beta.vercel.app";
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
 });
 
 const getFillColor = (fill) => {
@@ -41,10 +36,11 @@ export default function MapPanel() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
+
+  const load = useCallback(() => {
     Promise.all([
-      axios.get(`${API}/users/container-sites`, { headers: getHeaders() }),
-      axios.get(`${API}/users/containers/status`, { headers: getHeaders() }),
+      userApi.getContainerSites(),
+      userApi.getContainersStatus(),
     ])
       .then(([sitesRes, contRes]) => {
         setSites(sitesRes.data);
@@ -53,6 +49,8 @@ export default function MapPanel() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   if (loading) return <Loader />;
 
