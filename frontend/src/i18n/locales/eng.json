@@ -103,6 +103,13 @@
     "error": "Error",
     "success": "Saved",
     "language": "Language",
-    "logout": "Logout"
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "user": {
+    "map": "Map",
+    "containers": "Containers",
+    "tips": "Tips",
+    "notifications": "Notifications"
   }
 }

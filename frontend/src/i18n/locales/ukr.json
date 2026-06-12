@@ -103,6 +103,13 @@
     "error": "Помилка",
     "success": "Збережено",
     "language": "Мова",
-    "logout": "Вийти"
+    "logout": "Вийти",
+    "profile": "Профіль"
+  },
+    "user": {
+    "map": "Мапа",
+    "containers": "Контейнери",
+    "tips": "Поради",
+    "notifications": "Сповіщення"
   }
 }
