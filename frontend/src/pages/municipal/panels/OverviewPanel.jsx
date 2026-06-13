@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Th, Td, Loader, StatCard } from "../components/MunicipalTable";
+import { municipalApi } from "../api/municipalApi";
 import styles from "../municipal.module.css";
-
-const API = "https://ecofy-beta.vercel.app";
-const getHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem("token")}`,
-});
 
 export default function OverviewPanel() {
   const [stats, setStats] = useState(null);
@@ -15,8 +10,8 @@ export default function OverviewPanel() {
 
   useEffect(() => {
     Promise.all([
-      axios.get(`${API}/pickups/statistics`, { headers: getHeaders() }),
-      axios.get(`${API}/container-sites/`, { headers: getHeaders() }),
+      municipalApi.getPickupStats(),
+      municipalApi.getSites(),
     ])
       .then(([statsRes, sitesRes]) => {
         setStats(statsRes.data);
@@ -32,38 +27,33 @@ export default function OverviewPanel() {
     <div>
       <h2 className={styles.panelTitle}>Огляд</h2>
       <div className={styles.statsGrid}>
-        <StatCard icon="📍" value={sites.length} label="Майданчиків" color="#41B87A" />
-        <StatCard icon="🚚" value={stats?.total_pickups ?? 0} label="Вивозів всього" color="#2196F3" />
-        <StatCard icon="✅" value={stats?.completed_pickups ?? 0} label="Завершених" color="#4CAF50" />
-        <StatCard
-          icon="⏳"
-          value={(stats?.total_pickups ?? 0) - (stats?.completed_pickups ?? 0)}
-          label="Заплановано"
-          color="#F39C12"
-        />
+        <StatCard icon="📍" value={sites.length}                                          label="Майданчиків"    color="#41B87A" />
+        <StatCard icon="🚚" value={stats?.total_pickups ?? 0}                             label="Вивозів всього" color="#2196F3" />
+        <StatCard icon="✅" value={stats?.completed_pickups ?? 0}                         label="Завершених"     color="#4CAF50" />
+        <StatCard icon="⏳" value={(stats?.total_pickups ?? 0) - (stats?.completed_pickups ?? 0)} label="Заплановано" color="#F39C12" />
       </div>
 
-      <h3 className={styles.panelTitle} style={{ fontSize: 18, marginTop: 32 }}>
-        Мої майданчики
-      </h3>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <Th>Адреса</Th>
-            <Th>Вхід</Th>
-            <Th>Координати</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {sites.map((s) => (
-            <tr key={s.container_site_id} className={styles.tr}>
-              <Td>{s.street}, {s.building}</Td>
-              <Td>{s.entrance ?? "—"}</Td>
-              <Td>{s.location_lat}, {s.location_lng}</Td>
+      <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Мої майданчики</h3>
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <Th>Адреса</Th>
+              <Th>Вхід</Th>
+              <Th>Координати</Th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sites.map((s) => (
+              <tr key={s.container_site_id} className={styles.tr}>
+                <Td>{s.street}, {s.building}</Td>
+                <Td>{s.entrance ?? "—"}</Td>
+                <Td>{s.location_lat}, {s.location_lng}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

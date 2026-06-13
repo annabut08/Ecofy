@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Th, Td, Loader } from "../components/MunicipalTable";
-import { requestsApi } from "../../../api/requestApi";
+import { municipalApi } from "../api/municipalApi";
 import RequestStatusBadge from "../components/RequestStatusBadge";
 import styles from "../municipal.module.css";
 
@@ -11,7 +11,7 @@ export default function RequestsPanel() {
   const [updatingId, setUpdatingId] = useState(null);
 
   const load = useCallback(() => {
-    requestsApi.getAll()
+    municipalApi.getRequests()
       .then((r) => setRequests(r.data))
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -23,7 +23,7 @@ export default function RequestsPanel() {
     setError("");
     setUpdatingId(id);
     try {
-      await requestsApi.updateStatus(id, status);
+      await municipalApi.updateRequestStatus(id, status);
       load();
     } catch (err) {
       const msg = err.response?.data?.detail;
@@ -36,7 +36,7 @@ export default function RequestsPanel() {
   const handleDelete = async (id) => {
     if (!confirm("Видалити заявку?")) return;
     try {
-      await requestsApi.delete(id);
+      await municipalApi.deleteRequest(id);
       load();
     } catch (err) {
       const msg = err.response?.data?.detail;
@@ -58,14 +58,9 @@ export default function RequestsPanel() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <Th>ID</Th>
-              <Th>Компанія</Th>
-              <Th>Тип відходів</Th>
-              <Th>Опис</Th>
-              <Th>Кількість (кг)</Th>
-              <Th>Дата</Th>
-              <Th>Статус</Th>
-              <Th>Дії</Th>
+              <Th>ID</Th><Th>Компанія</Th><Th>Тип відходів</Th>
+              <Th>Опис</Th><Th>Кількість (кг)</Th><Th>Дата</Th>
+              <Th>Статус</Th><Th>Дії</Th>
             </tr>
           </thead>
           <tbody>
@@ -75,56 +70,45 @@ export default function RequestsPanel() {
                   Заявок немає
                 </td>
               </tr>
-            ) : (
-              requests.map((r) => (
-                <tr key={r.request_id} className={styles.tr}>
-                  <Td>{r.request_id}</Td>
-                  <Td>{r.client_id ?? "—"}</Td>
-                  <Td>{r.waste_type}</Td>
-                  <Td>{r.waste_description ?? "—"}</Td>
-                  <Td>{r.amount_kg ?? "—"}</Td>
-                  <Td>{new Date(r.created_at).toLocaleDateString("uk-UA")}</Td>
-                  <Td><RequestStatusBadge status={r.status} /></Td>
-                  <Td>
-                    <div className={styles.actions}>
-                      {r.status === "pending" && (
-                        <>
-                          <button
-                            className={styles.btnSuccess}
-                            disabled={updatingId === r.request_id}
-                            onClick={() => handleStatusChange(r.request_id, "approved")}
-                          >
-                            Схвалити
-                          </button>
-                          <button
-                            className={styles.btnWarning}
-                            disabled={updatingId === r.request_id}
-                            onClick={() => handleStatusChange(r.request_id, "rejected")}
-                          >
-                            Відхилити
-                          </button>
-                        </>
-                      )}
-                      {r.status === "approved" && (
-                        <button
-                          className={styles.btnSuccess}
+            ) : requests.map((r) => (
+              <tr key={r.request_id} className={styles.tr}>
+                <Td>{r.request_id}</Td>
+                <Td>{r.client_id ?? "—"}</Td>
+                <Td>{r.waste_type}</Td>
+                <Td>{r.waste_description ?? "—"}</Td>
+                <Td>{r.amount_kg ?? "—"}</Td>
+                <Td>{new Date(r.created_at).toLocaleDateString("uk-UA")}</Td>
+                <Td><RequestStatusBadge status={r.status} /></Td>
+                <Td>
+                  <div className={styles.actions}>
+                    {r.status === "pending" && (
+                      <>
+                        <button className={styles.btnSuccess}
                           disabled={updatingId === r.request_id}
-                          onClick={() => handleStatusChange(r.request_id, "completed")}
-                        >
-                          ✓ Виконано
+                          onClick={() => handleStatusChange(r.request_id, "approved")}>
+                          Схвалити
                         </button>
-                      )}
-                      <button
-                        className={styles.btnDanger}
-                        onClick={() => handleDelete(r.request_id)}
-                      >
-                        Видалити
+                        <button className={styles.btnWarning}
+                          disabled={updatingId === r.request_id}
+                          onClick={() => handleStatusChange(r.request_id, "rejected")}>
+                          Відхилити
+                        </button>
+                      </>
+                    )}
+                    {r.status === "approved" && (
+                      <button className={styles.btnSuccess}
+                        disabled={updatingId === r.request_id}
+                        onClick={() => handleStatusChange(r.request_id, "completed")}>
+                        ✓ Виконано
                       </button>
-                    </div>
-                  </Td>
-                </tr>
-              ))
-            )}
+                    )}
+                    <button className={styles.btnDanger} onClick={() => handleDelete(r.request_id)}>
+                      Видалити
+                    </button>
+                  </div>
+                </Td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
