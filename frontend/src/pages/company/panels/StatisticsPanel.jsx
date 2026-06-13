@@ -56,10 +56,14 @@ export default function StatisticsPanel() {
           <input className={styles.input} type="date" value={dateTo}
             onChange={(e) => setDateTo(e.target.value)} />
         </div>
-        <button className={styles.btnPrimary} onClick={handleApply}>{t("common.apply")}</button>
-        <button className={styles.btnOutline} onClick={handleExport} disabled={!stats.length}>
-          📥 {t("common.export")} CSV
-        </button>
+        <div className={styles.filterActions}>
+          <button className={styles.btnPrimary} onClick={handleApply}>
+            {t("common.apply")}
+          </button>
+          <button className={styles.btnOutline} onClick={handleExport} disabled={!stats.length}>
+            📥 {t("common.export")} CSV
+          </button>
+        </div>
       </div>
 
       {loading ? <Loader /> : (

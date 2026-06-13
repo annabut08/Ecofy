@@ -249,6 +249,7 @@
   color: #fff;
   border: none;
   border-radius: 8px;
+  border: 2.5px solid #D97706;
   padding: 10px 20px;
   font-size: 14px;
   font-weight: 700;
@@ -312,4 +313,11 @@
   color: #92400E;
   text-align: center;
   font-size: 15px;
+}
+
+.filterActions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding-bottom: 1px; /* вирівнювання з input */
 }

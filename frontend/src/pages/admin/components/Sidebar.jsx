@@ -12,7 +12,6 @@ export default function Sidebar({ active, setActive, onLogout }) {
     { id: "sites",         label: "📍 " + t("admin.sites")         },
     { id: "containers",    label: "🗑️ " + t("admin.containers")    },
     { id: "tips",          label: "♻️ " + t("admin.tips")          },
-    { id: "notifications", label: "🔔 " + t("admin.notifications") },
     { id: "export",        label: "📥 " + t("admin.export")        },
   ];
 
