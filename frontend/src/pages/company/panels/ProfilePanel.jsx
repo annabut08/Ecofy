@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader } from "../components/CompanyTable";
-import { companyApi } from "../api/companyApi";
+import { companyApi } from "../../../api/companyApi";
 import styles from "../company.module.css";
 
 export default function ProfilePanel() {

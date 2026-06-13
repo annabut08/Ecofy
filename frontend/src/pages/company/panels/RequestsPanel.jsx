@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Th, Td, Loader, BadgeGreen, BadgeRed, BadgeYellow } from "../components/CompanyTable";
-import { companyApi } from "../api/companyApi";
+import { companyApi } from "../../../api/companyApi";
 import styles from "../company.module.css";
 
 const WASTE_TYPES = ["Пластик", "Скло", "Папір", "Метал", "Електроніка", "Інше"];

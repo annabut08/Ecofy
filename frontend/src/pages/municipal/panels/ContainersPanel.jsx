@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Loader, Th, Td, BadgeGreen, BadgeRed } from "../components/MunicipalTable";
-import { municipalApi } from "../api/municipalApi";
+import { municipalApi } from "../../../api/municipalApi";
 import styles from "../municipal.module.css";
 
 const EMPTY_FORM = { type: "", container_site_id: "", fill_level: 0, status: "active" };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Th, Td, Loader, StatCard } from "../components/MunicipalTable";
-import { municipalApi } from "../api/municipalApi";
+import { municipalApi } from "../../../api/municipalApi";
 import styles from "../municipal.module.css";
 
 export default function OverviewPanel() {

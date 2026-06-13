@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Loader, Th, Td, BadgeGreen, BadgeRed } from "../components/MunicipalTable";
-import { municipalApi } from "../api/municipalApi";
+import { municipalApi } from "../../../api/municipalApi";
 import styles from "../municipal.module.css";
 
 const EMPTY_FORM = { device_name: "", serial_number: "", device_type: "", container_id: "", battery_level: 100 };

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader, StatCard } from "../components/CompanyTable";
-import { companyApi } from "../api/companyApi";
-import { downloadCSV } from "../../admin/utils/csvExport";
+import { companyApi } from "../../../api/companyApi";
+import { downloadCSV } from "../../../utils/csvExport";
 import styles from "../company.module.css";
 
 const WASTE_COLORS = {

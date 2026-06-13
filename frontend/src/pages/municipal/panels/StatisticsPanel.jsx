@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader, StatCard } from "../components/MunicipalTable";
-import { municipalApi } from "../api/municipalApi";
-import { downloadCSV } from "../../admin/utils/csvExport";
+import { municipalApi } from "../../../api/municipalApi";
+import { downloadCSV } from "../../../utils/csvExport";
 import styles from "../municipal.module.css";
 
 export default function StatisticsPanel() {

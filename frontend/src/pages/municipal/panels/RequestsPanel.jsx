@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Th, Td, Loader } from "../components/MunicipalTable";
-import { municipalApi } from "../api/municipalApi";
+import { municipalApi } from "../../../api/municipalApi";
 import RequestStatusBadge from "../components/RequestStatusBadge";
 import styles from "../municipal.module.css";
 
