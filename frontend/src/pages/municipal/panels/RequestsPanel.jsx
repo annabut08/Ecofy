@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Th, Td, Loader } from "../components/MunicipalTable";
 import { municipalApi } from "../api/municipalApi";
 import RequestStatusBadge from "../components/RequestStatusBadge";
 import styles from "../municipal.module.css";
 
 export default function RequestsPanel() {
+  const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -27,20 +29,20 @@ export default function RequestsPanel() {
       load();
     } catch (err) {
       const msg = err.response?.data?.detail;
-      setError(typeof msg === "string" ? msg : "Помилка оновлення статусу");
+      setError(typeof msg === "string" ? msg : t("common.error"));
     } finally {
       setUpdatingId(null);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Видалити заявку?")) return;
+    if (!confirm(t("admin.confirmDelete"))) return;
     try {
       await municipalApi.deleteRequest(id);
       load();
     } catch (err) {
       const msg = err.response?.data?.detail;
-      setError(typeof msg === "string" ? msg : "Помилка видалення");
+      setError(typeof msg === "string" ? msg : t("common.error"));
     }
   };
 
@@ -49,7 +51,7 @@ export default function RequestsPanel() {
   return (
     <div>
       <div className={styles.panelHeader}>
-        <h2 className={styles.panelTitle}>Заявки від компаній</h2>
+        <h2 className={styles.panelTitle}>{t("municipal.requestsFromCompanies")}</h2>
       </div>
 
       {error && <div className={styles.formError}>{error}</div>}
@@ -58,16 +60,20 @@ export default function RequestsPanel() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <Th>ID</Th><Th>Компанія</Th><Th>Тип відходів</Th>
-              <Th>Опис</Th><Th>Кількість (кг)</Th><Th>Дата</Th>
-              <Th>Статус</Th><Th>Дії</Th>
+              <Th>{t("common.id")}</Th>
+              <Th>{t("common.name")}</Th>
+              <Th>{t("municipal.wasteType")}</Th>
+              <Th>{t("municipal.wasteDesc")}</Th>
+              <Th>{t("municipal.amountKg")}</Th>
+              <Th>{t("common.status")}</Th>
+              <Th>{t("common.actions")}</Th>
             </tr>
           </thead>
           <tbody>
             {requests.length === 0 ? (
               <tr>
-                <td colSpan={8} className={styles.td} style={{ textAlign: "center", color: "#9CA3AF" }}>
-                  Заявок немає
+                <td colSpan={7} className={styles.td} style={{ textAlign: "center", color: "#9CA3AF" }}>
+                  {t("municipal.noRequests")}
                 </td>
               </tr>
             ) : requests.map((r) => (
@@ -77,7 +83,6 @@ export default function RequestsPanel() {
                 <Td>{r.waste_type}</Td>
                 <Td>{r.waste_description ?? "—"}</Td>
                 <Td>{r.amount_kg ?? "—"}</Td>
-                <Td>{new Date(r.created_at).toLocaleDateString("uk-UA")}</Td>
                 <Td><RequestStatusBadge status={r.status} /></Td>
                 <Td>
                   <div className={styles.actions}>
@@ -86,12 +91,12 @@ export default function RequestsPanel() {
                         <button className={styles.btnSuccess}
                           disabled={updatingId === r.request_id}
                           onClick={() => handleStatusChange(r.request_id, "approved")}>
-                          Схвалити
+                          {t("municipal.approve")}
                         </button>
                         <button className={styles.btnWarning}
                           disabled={updatingId === r.request_id}
                           onClick={() => handleStatusChange(r.request_id, "rejected")}>
-                          Відхилити
+                          {t("municipal.reject")}
                         </button>
                       </>
                     )}
@@ -99,11 +104,11 @@ export default function RequestsPanel() {
                       <button className={styles.btnSuccess}
                         disabled={updatingId === r.request_id}
                         onClick={() => handleStatusChange(r.request_id, "completed")}>
-                        ✓ Виконано
+                        ✓ {t("municipal.complete")}
                       </button>
                     )}
                     <button className={styles.btnDanger} onClick={() => handleDelete(r.request_id)}>
-                      Видалити
+                      {t("common.delete")}
                     </button>
                   </div>
                 </Td>

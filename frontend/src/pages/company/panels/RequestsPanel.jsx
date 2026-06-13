@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Th, Td, Loader, BadgeGreen, BadgeRed, BadgeYellow } from "../components/CompanyTable";
-import { companyApi } from "../../../api/companyApi";
+import { companyApi } from "../api/companyApi";
 import styles from "../company.module.css";
 
 const WASTE_TYPES = ["Пластик", "Скло", "Папір", "Метал", "Електроніка", "Інше"];
@@ -12,21 +13,8 @@ const EMPTY_FORM = {
   organization_id: "",
 };
 
-const STATUS_LABELS = {
-  pending:   "Очікує",
-  approved:  "Схвалено",
-  rejected:  "Відхилено",
-  completed: "Завершено",
-};
-
-const getStatusBadge = (status) => {
-  const label = STATUS_LABELS[status] ?? status;
-  if (status === "approved" || status === "completed") return <BadgeGreen>{label}</BadgeGreen>;
-  if (status === "rejected") return <BadgeRed>{label}</BadgeRed>;
-  return <BadgeYellow>{label}</BadgeYellow>;
-};
-
 export default function RequestsPanel() {
+  const { t } = useTranslation();
   const [requests, setRequests] = useState([]);
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,11 +22,21 @@ export default function RequestsPanel() {
   const [error, setError] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);
 
+  const getStatusBadge = (status) => {
+    const labels = {
+      pending:   t("company.statusPending"),
+      approved:  t("company.statusApproved"),
+      rejected:  t("company.statusRejected"),
+      completed: t("company.statusCompleted"),
+    };
+    const label = labels[status] ?? status;
+    if (status === "approved" || status === "completed") return <BadgeGreen>{label}</BadgeGreen>;
+    if (status === "rejected") return <BadgeRed>{label}</BadgeRed>;
+    return <BadgeYellow>{label}</BadgeYellow>;
+  };
+
   const load = useCallback(() => {
-    Promise.all([
-      companyApi.getRequests(),
-      companyApi.getOrganizations(),
-    ])
+    Promise.all([companyApi.getRequests(), companyApi.getOrganizations()])
       .then(([reqRes, orgRes]) => {
         setRequests(reqRes.data);
         setOrganizations(orgRes.data);
@@ -64,77 +62,51 @@ export default function RequestsPanel() {
       load();
     } catch (err) {
       const msg = err.response?.data?.detail;
-      setError(typeof msg === "string" ? msg : "Помилка створення заявки");
+      setError(typeof msg === "string" ? msg : t("common.error"));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Скасувати заявку?")) return;
+    if (!confirm(t("admin.confirmDelete"))) return;
     try {
       await companyApi.deleteRequest(id);
       load();
     } catch (err) {
       const msg = err.response?.data?.detail;
-      setError(typeof msg === "string" ? msg : "Помилка скасування");
+      setError(typeof msg === "string" ? msg : t("common.error"));
     }
   };
 
   return (
     <div>
-      <h2 className={styles.panelTitle}>Заявки на вивіз вторсировини</h2>
+      <h2 className={styles.panelTitle}>{t("company.requestsTitle")}</h2>
 
       <form onSubmit={handleAdd} className={styles.addForm}>
-        <h3 className={styles.formTitle}>Нова заявка</h3>
-
+        <h3 className={styles.formTitle}>{t("company.newRequest")}</h3>
         {error && <div style={{ color: "#DC2626", fontSize: 14 }}>{error}</div>}
-
         <div className={styles.formRow}>
-          <select
-            className={styles.input}
-            value={form.waste_type}
-            onChange={(e) => setForm({ ...form, waste_type: e.target.value })}
-          >
+          <select className={styles.input} value={form.waste_type}
+            onChange={(e) => setForm({ ...form, waste_type: e.target.value })}>
             {WASTE_TYPES.map((t) => <option key={t}>{t}</option>)}
           </select>
-
-          <input
-            className={styles.input}
-            type="number"
-            placeholder="Кількість (кг)"
-            value={form.amount_kg}
-            onChange={(e) => setForm({ ...form, amount_kg: e.target.value })}
-            min="1"
-            required
-          />
-
-          <select
-            className={styles.input}
-            value={form.organization_id}
-            onChange={(e) => setForm({ ...form, organization_id: e.target.value })}
-            required
-          >
-            <option value="">Оберіть організацію</option>
+          <input className={styles.input} type="number" placeholder={t("company.amountKg")}
+            value={form.amount_kg} min="1" required
+            onChange={(e) => setForm({ ...form, amount_kg: e.target.value })} />
+          <select className={styles.input} value={form.organization_id} required
+            onChange={(e) => setForm({ ...form, organization_id: e.target.value })}>
+            <option value="">{t("company.chooseOrg")}</option>
             {organizations.map((o) => (
-              <option key={o.organization_id} value={o.organization_id}>
-                {o.name}
-              </option>
+              <option key={o.organization_id} value={o.organization_id}>{o.name}</option>
             ))}
           </select>
         </div>
-
-        <textarea
-          className={styles.input}
-          placeholder="Опис (необов'язково)"
-          value={form.waste_description}
-          onChange={(e) => setForm({ ...form, waste_description: e.target.value })}
-          rows={2}
-          style={{ resize: "vertical" }}
-        />
-
+        <textarea className={styles.input} placeholder={t("company.descOptional")}
+          value={form.waste_description} rows={2} style={{ resize: "vertical" }}
+          onChange={(e) => setForm({ ...form, waste_description: e.target.value })} />
         <button className={styles.btnPrimary} type="submit" disabled={saving}>
-          {saving ? "Збереження..." : "Подати заявку"}
+          {saving ? t("common.loading") : t("company.submit")}
         </button>
       </form>
 
@@ -142,22 +114,19 @@ export default function RequestsPanel() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <Th>ID</Th>
-              <Th>Тип відходів</Th>
-              <Th>Кількість</Th>
-              <Th>Організація</Th>
-              <Th>Статус</Th>
-              <Th>Дата</Th>
-              <Th>Дії</Th>
+              <Th>{t("common.id")}</Th>
+              <Th>{t("company.wasteType")}</Th>
+              <Th>{t("company.amountKg")}</Th>
+              <Th>{t("company.organization")}</Th>
+              <Th>{t("common.status")}</Th>
+              <Th>{t("common.actions")}</Th>
             </tr>
           </thead>
           <tbody>
             {requests.length === 0 ? (
-              <tr>
-                <td colSpan={7} style={{ textAlign: "center", padding: 40, color: "#9CA3AF" }}>
-                  Заявок поки немає. Подайте першу заявку вище.
-                </td>
-              </tr>
+              <tr><td colSpan={6} style={{ textAlign: "center", padding: 40, color: "#9CA3AF" }}>
+                {t("company.noRequests")}
+              </td></tr>
             ) : requests.map((r) => (
               <tr key={r.request_id} className={styles.tr}>
                 <Td>{r.request_id}</Td>
@@ -165,11 +134,10 @@ export default function RequestsPanel() {
                 <Td>{r.amount_kg} кг</Td>
                 <Td>{r.organization_id}</Td>
                 <Td>{getStatusBadge(r.status)}</Td>
-                <Td>{r.created_at ? new Date(r.created_at).toLocaleDateString("uk-UA") : "—"}</Td>
                 <Td>
                   {r.status === "pending" && (
                     <button className={styles.btnDanger} onClick={() => handleDelete(r.request_id)}>
-                      Скасувати
+                      {t("company.cancel")}
                     </button>
                   )}
                 </Td>

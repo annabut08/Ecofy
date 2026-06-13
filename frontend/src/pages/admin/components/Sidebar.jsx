@@ -1,16 +1,21 @@
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../../components/common/LanguageSwitcher";
 import styles from "../admin.module.css";
 
-const MENU = [
-  { id: "users", label: "👤 Користувачі" },
-  { id: "companies", label: "🏭 Компанії-клієнти" },
-  { id: "organizations", label: "🏢 Організації" },
-  { id: "sites", label: "📍 Майданчики" },
-  { id: "containers", label: "🗑️ Контейнери" },
-  { id: "tips", label: "♻️ Поради" },
-  { id: "export", label: "📥 Експорт" },
-];
-
 export default function Sidebar({ active, setActive, onLogout }) {
+  const { t } = useTranslation();
+
+  const MENU = [
+    { id: "users",         label: "👤 " + t("admin.users")         },
+    { id: "companies",     label: "🏭 " + t("admin.companies")     },
+    { id: "organizations", label: "🏢 " + t("admin.organizations") },
+    { id: "sites",         label: "📍 " + t("admin.sites")         },
+    { id: "containers",    label: "🗑️ " + t("admin.containers")    },
+    { id: "tips",          label: "♻️ " + t("admin.tips")          },
+    { id: "notifications", label: "🔔 " + t("admin.notifications") },
+    { id: "export",        label: "📥 " + t("admin.export")        },
+  ];
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.sidebarLogo}>🌿 Ecofy Admin</div>
@@ -25,8 +30,11 @@ export default function Sidebar({ active, setActive, onLogout }) {
           </button>
         ))}
       </nav>
+      <div style={{ padding: "0 12px", marginBottom: 12 }}>
+        <LanguageSwitcher />
+      </div>
       <button className={styles.logoutBtn} onClick={onLogout}>
-        🚪 Вийти
+        🚪 {t("common.logout")}
       </button>
     </aside>
   );
