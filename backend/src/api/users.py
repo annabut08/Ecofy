@@ -8,7 +8,8 @@ from src.models.containers import Containers
 from src.api.auth import get_current_user
 from src.database import get_db
 from src.models.users import Users
-from src.schemas.users import UserCreate, UserResponse
+from src.models.cities import Cities
+from src.schemas.users import UserCreate, UserResponse, UpdateCity, UserUpdate
 from src.api.core import hash_password
 
 router = APIRouter(
@@ -18,21 +19,26 @@ router = APIRouter(
 
 
 @router.post("/register", status_code=201)
-def register_user(data: UserCreate, db: Session = Depends(get_db)):
+def register_user(
+    data: UserCreate,
+    db: Session = Depends(get_db)
+):
+    existing = db.query(Users).filter(
+        Users.email == data.email
+    ).first()
 
-    existing = db.query(Users).filter(Users.email == data.email).first()
     if existing:
-        raise HTTPException(409, "User with this email already exists")
+        raise HTTPException(
+            status_code=409,
+            detail="User with this email already exists"
+        )
 
     hashed_password = hash_password(data.password)
 
     new_user = Users(
         first_name=data.first_name,
-        last_name=data.last_name,
-        patronymic=data.patronymic,
         email=data.email,
         phone_number=data.phone_number,
-        city=data.city,
         password_hash=hashed_password
     )
 
@@ -40,13 +46,13 @@ def register_user(data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "User registered successfully", "user_id": new_user.user_id}
+    return {
+        "message": "User registered successfully",
+        "user_id": new_user.user_id
+    }
 
 
-@router.get(
-    "/container-sites",
-    summary="View container sites"
-)
+@router.get("/container-sites", summary="View container sites")
 def get_container_sites(
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
@@ -57,31 +63,22 @@ def get_container_sites(
 
     if role == "user":
         query = query.filter(
-            ContainerSite.city.ilike(entity.city)
+            ContainerSite.city_id == entity.city_id  # ← виправлено
         )
     elif role == "admin":
         pass
     else:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied"
-        )
+        raise HTTPException(status_code=403, detail="Access denied")
 
     sites = query.all()
 
     if not sites:
-        raise HTTPException(
-            status_code=404,
-            detail="No container sites found"
-        )
+        raise HTTPException(status_code=404, detail="No container sites found")
 
     return sites
 
 
-@router.get(
-    "/containers",
-    summary="Search containers by waste type"
-)
+@router.get("/containers", summary="Search containers by waste type")
 def search_containers_by_type(
     waste_type: str,
     db: Session = Depends(get_db),
@@ -96,7 +93,7 @@ def search_containers_by_type(
             Containers.fill_level,
             Containers.status,
             ContainerSite.container_site_id,
-            ContainerSite.city,
+            ContainerSite.city_id,
             ContainerSite.street,
             ContainerSite.building
         )
@@ -106,7 +103,7 @@ def search_containers_by_type(
 
     if role == "user":
         query = query.filter(
-            ContainerSite.city.ilike(entity.city)
+            ContainerSite.city_id == entity.city_id
         )
     elif role == "admin":
         pass
@@ -129,7 +126,7 @@ def search_containers_by_type(
             "status": c.status,
             "container_site": {
                 "site_id": c.container_site_id,
-                "city": c.city,
+                "city_id": c.city_id,
                 "address": f"{c.street}, {c.building}"
             }
         }
@@ -154,7 +151,7 @@ def get_containers_by_site(
 
     if role == "user":
         site_query = site_query.filter(
-            ContainerSite.city.ilike(entity.city)
+            ContainerSite.city_id == entity.city_id
         )
     elif role == "admin":
         pass
@@ -174,7 +171,7 @@ def get_containers_by_site(
 
     return {
         "container_site_id": site.container_site_id,
-        "city": site.city,
+        "city_id": site.city_id,
         "address": f"{site.street}, {site.building}",
         "containers": [
             {
@@ -186,6 +183,81 @@ def get_containers_by_site(
             for c in containers
         ]
     }
+
+
+@router.patch("/{user_id}/city", response_model=UserResponse)
+def update_user_city(
+    user_id: int,
+    request: UpdateCity,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    if role != "admin" and (
+        role != "user" or entity.user_id != user_id
+    ):
+        raise HTTPException(status_code=403, detail="Немає доступу")
+
+    user = db.query(Users).filter(Users.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Користувача не знайдено")
+
+    city = db.query(Cities).filter(Cities.city_id == request.city_id).first()
+    if not city:
+        raise HTTPException(status_code=404, detail="Місто не знайдено")
+
+    user.city_id = request.city_id
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+
+@router.get("/containers/status", summary="Get container statuses for user city")
+def get_container_status(
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    entity, role = current
+
+    query = (
+        db.query(
+            Containers.container_id,
+            Containers.type,
+            Containers.fill_level,
+            Containers.status,
+            ContainerSite.container_site_id,
+            ContainerSite.street,
+            ContainerSite.building
+        )
+        .join(ContainerSite)
+    )
+
+    if role == "user":
+        query = query.filter(
+            ContainerSite.city_id == entity.city_id
+        )
+    elif role == "admin":
+        pass
+    else:
+        raise HTTPException(403, "Access denied")
+
+    containers = query.all()
+
+    return [
+        {
+            "container_id": c.container_id,
+            "waste_type": c.type,
+            "fill_level": c.fill_level,
+            "status": c.status,
+            "container_site": {
+                "site_id": c.container_site_id,
+                "address": f"{c.street}, {c.building}"
+            }
+        }
+        for c in containers
+    ]
 
 
 @router.get(
@@ -206,7 +278,7 @@ def new_container_site_notifications(
         )
         .filter(
             Notifications.message_type == "new_container_site",
-            ContainerSite.city == user.city,
+            ContainerSite.city_id == user.city_id,
             Notifications.user_id == user.user_id
         )
         .order_by(Notifications.created_at.desc())
@@ -263,7 +335,7 @@ def get_user(
 @router.put("/{user_id}", response_model=UserResponse)
 def update_user(
     user_id: int,
-    data: UserCreate,
+    data: UserUpdate,  # ← замінено
     db: Session = Depends(get_db),
     current=Depends(get_current_user)
 ):
@@ -281,7 +353,12 @@ def update_user(
     if not user:
         raise HTTPException(404, "User not found")
 
-    update_data = data.dict(exclude_unset=True)
+    update_data = data.dict(exclude_unset=True, exclude_none=True)
+
+    if "password" in update_data:
+        update_data["password_hash"] = hash_password(
+            update_data.pop("password"))
+
     for field, value in update_data.items():
         setattr(user, field, value)
 

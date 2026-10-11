@@ -60,7 +60,7 @@ def create_container_site(
 
     users = (
         db.query(Users)
-        .filter(Users.city == site.city)
+        .filter(Users.city_id == site.city_id)
         .all()
     )
 

@@ -1,24 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.api import users, devices, containers, organizations, disposal_requests
-from src.api import auth, client_companies, vehicles, container_sites, admin, pickups
+from src.api import auth, client_companies, vehicles, container_sites, admin, pickups, cities, tips
 from src.api import analytics, doc
 
-
 app = FastAPI(
-    title="Ecofy 🍀 ",
+    title="Ecofy 🍀",
     description="Ecofy — система для управління утилізацією та вивезенням відходів",
     version="1.0.0"
 )
 
-origins = [
-    "http://localhost:3000",
-    "https://ecofy-beta.vercel.app"
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:3000",
+        "https://ecofy-beta.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,9 +31,11 @@ app.include_router(devices.router)
 app.include_router(containers.router)
 app.include_router(container_sites.router)
 app.include_router(vehicles.router)
+app.include_router(cities.router)
 app.include_router(admin.router)
 app.include_router(disposal_requests.router)
 app.include_router(pickups.router)
+app.include_router(tips.router)
 app.include_router(analytics.router)
 app.include_router(doc.router)
 

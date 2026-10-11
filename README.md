@@ -1,2 +1,2 @@
-﻿# Ecofy
+Ecofy
 
