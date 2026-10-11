@@ -75,8 +75,6 @@ def get_devices(
     raise HTTPException(403, "Access denied")
 
 
-<<<<<<< HEAD
-=======
 @router.put("/{device_id}", response_model=DeviceResponse)
 def update_device(
     device_id: int,
@@ -117,18 +115,13 @@ def update_device(
     return device
 
 
->>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
 def check_fill_level(fill_level: float, container, db: Session):
     if fill_level >= 90:
         db.add(Notifications(
             message="Контейнер майже заповнений",
             message_type="WARNING",
-<<<<<<< HEAD
-            container_site_id=container.container_site_id
-=======
             container_site_id=container.container_site_id,
             container_id=container.container_id
->>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
         ))
 
 
@@ -137,12 +130,9 @@ def check_tilt(tilted: bool, container, db: Session):
         db.add(Notifications(
             message="Контейнер нахилений",
             message_type="CRITICAL",
-<<<<<<< HEAD
-            container_site_id=container.container_site_id
-=======
+
             container_site_id=container.container_site_id,
             container_id=container.container_id
->>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
         ))
 
 
@@ -151,23 +141,15 @@ def check_temperature(temperature: float, container, db: Session):
         db.add(Notifications(
             message=f"Критично висока температура в контейнері ({temperature} °C)",
             message_type="CRITICAL",
-<<<<<<< HEAD
-            container_site_id=container.container_site_id
-=======
             container_site_id=container.container_site_id,
             container_id=container.container_id
->>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
         ))
     elif temperature >= 45:
         db.add(Notifications(
             message=f"Підвищена температура в контейнері ({temperature} °C)",
             message_type="WARNING",
-<<<<<<< HEAD
-            container_site_id=container.container_site_id
-=======
             container_site_id=container.container_site_id,
             container_id=container.container_id
->>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
         ))
 
 
@@ -176,23 +158,13 @@ def check_battery(battery_level: int, device, db: Session):
         db.add(Notifications(
             message="Критично низький рівень заряду батареї пристрою",
             message_type="CRITICAL",
-<<<<<<< HEAD
-            container_site_id=device.container.container_site_id
-=======
             container_site_id=device.container.container_site_id,
             container_id=device.container.container_id
->>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
         ))
     elif battery_level <= 20:
         db.add(Notifications(
             message="Низький рівень заряду батареї пристрою",
             message_type="WARNING",
-<<<<<<< HEAD
-            container_site_id=device.container.container_site_id
-        ))
-
-
-=======
             container_site_id=device.container.container_site_id,
             container_id=device.container.container_id
         ))
@@ -213,7 +185,6 @@ def update_container_status(container: Containers):
     container.status = ",".join(statuses)
 
 
->>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
 @router.post("/telemetry")
 def receive_telemetry(
     data: DeviceTelemetry,
@@ -246,11 +217,7 @@ def receive_telemetry(
     container.tilted = data.tilted
     container.last_update = datetime.utcnow()
 
-<<<<<<< HEAD
-=======
     update_container_status(container)
-
->>>>>>> 7d585d649d1865666b3e9a4cc0066238e17ae7a2
     check_fill_level(fill_level, container, db)
     check_tilt(data.tilted, container, db)
     check_temperature(temperature, container, db)

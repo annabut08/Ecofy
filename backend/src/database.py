@@ -1,16 +1,18 @@
 import os
+from pathlib import Path
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from dotenv import load_dotenv
 
-load_dotenv()
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / ".env.local")
 
-DATABASE_URL = (
-    f"postgresql+psycopg2://{os.getenv('DB_USER')}:"
-    f"{os.getenv('DB_PASSWORD')}@"
-    f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/"
-    f"{os.getenv('DB_NAME')}?sslmode=require"
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError(
+        f"DATABASE_URL is not set in the environment or {PROJECT_ROOT / '.env.local'}"
+    )
 
 engine = create_engine(DATABASE_URL, echo=False)
 
