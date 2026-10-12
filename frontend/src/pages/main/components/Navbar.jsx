@@ -14,7 +14,7 @@ export default function Navbar({ scrolled, lang }) {
       transition: "all 0.3s",
     }}>
       <span style={{ fontSize: 20, fontWeight: 900, color: "#1A2E1A", letterSpacing: "-0.5px" }}>
-        🌿 Ecofy
+        Ecofy
       </span>
       <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
         <a href="#solutions" style={navLink}>
