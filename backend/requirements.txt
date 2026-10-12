@@ -2,6 +2,7 @@ fastapi
 sqlalchemy
 pydantic
 psycopg2-binary
+psycopg[binary]
 python-jose
 passlib[bcrypt]==1.7.4
 bcrypt==3.2.2
